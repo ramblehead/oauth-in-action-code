@@ -1,5 +1,18 @@
 ;; Hey Emacs, this is -*- coding: utf-8 -*-
 
+;; (defun do-something (process signal)
+;;   (when (memq (process-status process) '(exit signal))
+;;     (message "Do something!")
+;;     (shell-command-sentinel process signal)))
+
+;; (let* ((output-buffer (generate-new-buffer "*Async shell command*"))
+;;        (proc (progn
+;;                (async-shell-command "sleep 10; echo Finished" output-buffer)
+;;                (get-buffer-process output-buffer))))
+;;   (if (process-live-p proc)
+;;       (set-process-sentinel proc #'do-something)
+;;     (message "No process running.")))
+
 (require 'hydra)
 
 (defvar rh-oauth-in-action/ch-3-ex1-run-client-buffer-name

@@ -15,16 +15,33 @@
 
 (require 'hydra)
 
+(async-shell-command "sleep 10; echo Finished"
+                     rh-oauth-in-action/ch-3-ex1-run-client-buffer-name)
+
 (defvar rh-oauth-in-action/ch-3-ex1-run-client-buffer-name
   "*oauth-in-action/ch-3-ex1-client*")
 
-(defun rh--oauth-in-action-run (command &optional shell-buffer-name)
+;; (defun rh--oauth-in-action-run (command &optional shell-buffer-name)
+;;   (let ((project-root (rh-project-get-root))
+;;         (project-path (rh-project-get-path)))
+;;     (switch-to-buffer (shell shell-buffer-name))
+;;     (comint-quit-subjob)
+;;     (comint-send-string (current-buffer) (concat "cd " project-root "\r"))
+;;     (comint-send-string (current-buffer) (concat command "\r"))))
+
+(defun rh--oauth-in-action-run (command output-buffer-name)
   (let ((project-root (rh-project-get-root))
         (project-path (rh-project-get-path)))
-    (switch-to-buffer (shell shell-buffer-name))
-    (comint-quit-subjob)
-    (comint-send-string (current-buffer) (concat "cd " project-root "\r"))
-    (comint-send-string (current-buffer) (concat command "\r"))))
+    (let* ((output-buffer (get-buffer-create output-buffer-name))
+           (full-command (concat project-path command))
+           (proc (progn
+                   (async-shell-command full-command output-buffer)
+                   (get-buffer-process output-buffer))))
+      (if (process-live-p proc)
+          (message "Process running.")
+          ;; (set-process-sentinel proc #'do-something)
+        (message "No process running.")))
+    ))
 
 (defun rh-oauth-in-action-restart-client ()
   (interactive)
@@ -37,7 +54,7 @@
     "oauth-in-action/ch-3-ex1 project commands"
     ("l" cb-wtx-storybook-run-local "run-local")))
 
-(rh-oauth-in-action-hydra-define)
+(rh-oauth-in-action/ch-3-ex1-hydra-define)
 
 (defun rh-oauth-in-action-setup ()
   (let* ((project-root (rh-project-get-root))

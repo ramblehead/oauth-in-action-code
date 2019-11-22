@@ -48,7 +48,7 @@ app.get('/authorize', function(req, res){
 	/*
 	 * Send the user to the authorization server
 	 */
-	
+
 });
 
 app.get('/callback', function(req, res){
@@ -56,7 +56,7 @@ app.get('/callback', function(req, res){
 	/*
 	 * Parse the response from the authorization server and get a token
 	 */
-	
+
 });
 
 app.get('/fetch_resource', function(req, res) {
@@ -64,7 +64,7 @@ app.get('/fetch_resource', function(req, res) {
 	/*
 	 * Use the access token to call the resource server
 	 */
-	
+
 });
 
 var buildUrl = function(base, options, hash) {
@@ -79,7 +79,7 @@ var buildUrl = function(base, options, hash) {
 	if (hash) {
 		newUrl.hash = hash;
 	}
-	
+
 	return url.format(newUrl);
 };
 
@@ -94,4 +94,3 @@ var server = app.listen(9000, 'localhost', function () {
   var port = server.address().port;
   console.log('OAuth Client is listening at http://%s:%s', host, port);
 });
- 

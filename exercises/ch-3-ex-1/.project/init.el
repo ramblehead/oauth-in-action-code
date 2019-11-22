@@ -13,50 +13,104 @@
 ;;       (set-process-sentinel proc #'do-something)
 ;;     (message "No process running.")))
 
-(require 'hydra)
 
-(async-shell-command "sleep 10; echo Finished"
-                     rh-oauth-in-action/ch-3-ex1-run-client-buffer-name)
+;; https://emacs.stackexchange.com/questions/18901/understanding-uninterned-symbols-and-macro-expansion
+
+;; (setq print-gensym t)
+
+;; (setq print-circle t)
+
+;; (let ((make-symbol "max"))
+;;   (make-symbol "max"))
+
+(require 'hydra)
 
 (defvar rh-oauth-in-action/ch-3-ex1-run-client-buffer-name
   "*oauth-in-action/ch-3-ex1-client*")
 
-;; (defun rh--oauth-in-action-run (command &optional shell-buffer-name)
-;;   (let ((project-root (rh-project-get-root))
-;;         (project-path (rh-project-get-path)))
-;;     (switch-to-buffer (shell shell-buffer-name))
-;;     (comint-quit-subjob)
-;;     (comint-send-string (current-buffer) (concat "cd " project-root "\r"))
-;;     (comint-send-string (current-buffer) (concat command "\r"))))
+(defvar rh-oauth-in-action/ch-3-ex1-run-protected-resource-buffer-name
+  "*oauth-in-action/ch-3-ex1-protected-resource*")
 
-(defun rh--oauth-in-action-run (command output-buffer-name)
-  (let ((project-root (rh-project-get-root))
-        (project-path (rh-project-get-path)))
-    (let* ((output-buffer (get-buffer-create output-buffer-name))
-           (full-command (concat project-path command))
-           (proc (progn
-                   (async-shell-command full-command output-buffer)
-                   (get-buffer-process output-buffer))))
-      (if (process-live-p proc)
-          (message "Process running.")
-          ;; (set-process-sentinel proc #'do-something)
-        (message "No process running.")))
-    ))
+(defvar rh-oauth-in-action/ch-3-ex1-run-authorization-server-buffer-name
+  "*oauth-in-action/ch-3-ex1-authorization-server*")
 
-(defun rh-oauth-in-action-restart-client ()
+(defun rh-oauth-in-action/ch-3-ex1-restart-client ()
   (interactive)
-  (rh--oauth-in-action-run
-   "node client.js"
+  (rh-project-restart-shell-command
+   "run-client"
    rh-oauth-in-action/ch-3-ex1-run-client-buffer-name))
 
+(defun rh-oauth-in-action/ch-3-ex1-restart-protected-resource ()
+  (interactive)
+  (rh-project-restart-shell-command
+   "run-protected-resource"
+   rh-oauth-in-action/ch-3-ex1-run-protected-resource-buffer-name))
+
+(defun rh-oauth-in-action/ch-3-ex1-restart-authorization-server ()
+  (interactive)
+  (rh-project-restart-shell-command
+   "run-authorization-server"
+   rh-oauth-in-action/ch-3-ex1-run-authorization-server-buffer-name))
+
+(defun rh-oauth-in-action/ch-3-ex1-restart-all ()
+  (interactive)
+  (rh-oauth-in-action/ch-3-ex1-restart-client)
+  (rh-oauth-in-action/ch-3-ex1-restart-protected-resource)
+  (rh-oauth-in-action/ch-3-ex1-restart-authorization-server))
+
+(defun rh-oauth-in-action/ch-3-ex1-kill-client ()
+  (interactive)
+  (rh-project-kill-shell-process
+   rh-oauth-in-action/ch-3-ex1-run-client-buffer-name))
+
+(defun rh-oauth-in-action/ch-3-ex1-kill-protected-resource ()
+  (interactive)
+  (rh-project-kill-shell-process
+   rh-oauth-in-action/ch-3-ex1-run-protected-resource-buffer-name))
+
+(defun rh-oauth-in-action/ch-3-ex1-kill-authorization-server ()
+  (interactive)
+  (rh-project-kill-shell-process
+   rh-oauth-in-action/ch-3-ex1-run-authorization-server-buffer-name))
+
+(defun rh-oauth-in-action/ch-3-ex1-kill-all ()
+  (interactive)
+  (rh-oauth-in-action/ch-3-ex1-kill-client)
+  (rh-oauth-in-action/ch-3-ex1-kill-protected-resource)
+  (rh-oauth-in-action/ch-3-ex1-kill-authorization-server))
+
 (defun rh-oauth-in-action/ch-3-ex1-hydra-define ()
-  (defhydra rh-wtx-storybook-hydra (:color blue :columns 6)
+  (defhydra rh-oauth-in-action/ch-3-ex1-hydra (:color blue :columns 4)
     "oauth-in-action/ch-3-ex1 project commands"
-    ("l" cb-wtx-storybook-run-local "run-local")))
+    ("a" rh-oauth-in-action/ch-3-ex1-restart-all
+     "restart-all")
+    ("c" rh-oauth-in-action/ch-3-ex1-restart-client
+     "restart-client")
+    ("r" rh-oauth-in-action/ch-3-ex1-restart-protected-resource
+     "restart-protected-resource")
+    ("z" rh-oauth-in-action/ch-3-ex1-restart-authorization-server
+     "restart-authorization-server")
+    ("A" rh-oauth-in-action/ch-3-ex1-kill-all
+     "kill-all")
+    ("C" rh-oauth-in-action/ch-3-ex1-kill-client
+     "kill-client")
+    ("R" rh-oauth-in-action/ch-3-ex1-kill-protected-resource
+     "kill-protected-resource")
+    ("Z" rh-oauth-in-action/ch-3-ex1-kill-authorization-server
+     "kill-authorization-server")))
 
 (rh-oauth-in-action/ch-3-ex1-hydra-define)
 
-(defun rh-oauth-in-action-setup ()
+(define-minor-mode rh-oauth-in-action/ch-3-ex1-mode
+  "rh-oauth-in-action/ch-3-ex1 project-specific minor mode."
+  :lighter " rh-oauth-in-action/ch-3-ex1"
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "<f9>") #'rh-oauth-in-action/ch-3-ex1-hydra/body)
+            map))
+
+(add-to-list 'rm-blacklist " rh-oauth-in-action/ch-3-ex1")
+
+(defun rh-oauth-in-action/ch-3-ex1-setup ()
   (let* ((project-root (rh-project-get-root))
          (project-path (rh-project-get-path))
          (meta-path (concat project-root ".meta/"))

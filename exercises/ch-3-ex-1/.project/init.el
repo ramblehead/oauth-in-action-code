@@ -56,7 +56,8 @@
   (interactive)
   (rh-oauth-in-action/ch-3-ex1-restart-client)
   (rh-oauth-in-action/ch-3-ex1-restart-protected-resource)
-  (rh-oauth-in-action/ch-3-ex1-restart-authorization-server))
+  (rh-oauth-in-action/ch-3-ex1-restart-authorization-server)
+  (rh-bs-show-bs-in-bottom-0-side-window "shells"))
 
 (defun rh-oauth-in-action/ch-3-ex1-kill-client ()
   (interactive)

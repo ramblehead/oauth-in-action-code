@@ -113,8 +113,7 @@
 
 (defun rh-oauth-in-action/ch-3-ex1-setup ()
   (let* ((project-root (rh-project-get-root))
-         (project-path (rh-project-get-path))
-         (meta-path (concat project-root ".meta/"))
+         ;; (project-path (rh-project-get-path))
          file-rpath)
     (when project-root
       (setq file-rpath (file-relative-name buffer-file-name project-root))

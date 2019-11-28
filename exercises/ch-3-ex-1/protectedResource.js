@@ -63,7 +63,7 @@ var getAccessToken = function(req, res, next) {
             req.access_token = response;
             next();
         });
-});
+    });
 };
 
 app.options('/resource', cors());

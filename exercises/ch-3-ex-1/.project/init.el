@@ -113,10 +113,10 @@
 
 (defun rh-oauth-in-action/ch-3-ex1-setup ()
   (let* ((project-root (rh-project-get-root))
-         ;; (project-path (rh-project-get-path))
-         file-rpath)
+         file-rpath ext-js)
     (when project-root
-      (setq file-rpath (file-relative-name buffer-file-name project-root))
+      (setq file-rpath (abbreviate-file-name
+                        (expand-file-name buffer-file-name project-root)))
       (cond
        ((string-match-p "\\.css\\'" file-rpath)
         (rh-setup-css-skewer))

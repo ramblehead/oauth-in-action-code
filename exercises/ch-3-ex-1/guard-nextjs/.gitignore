@@ -1,0 +1,9 @@
+# dependencies
+/external
+/node_modules
+/yarn-error.log
+
+# generators
+
+# building
+/.next

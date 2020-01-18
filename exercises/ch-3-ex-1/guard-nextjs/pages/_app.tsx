@@ -2,17 +2,39 @@
 
 /* eslint-disable react/jsx-props-no-spreading */
 
-import React from 'react';
+import React, {
+  useState,
+  useCallback,
+  createContext,
+  useContext,
+  Provider,
+} from 'react';
+
 import { AppProps } from 'next/app';
 // import App, { AppContext, AppInitialProps, AppProps } from 'next/app';
 
-import { GateRefContextProvider } from '../models/gate';
+import AppSession from '../session';
+
+interface AppSessionRef {
+  current: AppSession;
+}
+
+const AppSessionContext =
+  createContext<AppSessionRef>(null as unknown as AppSessionRef);
 
 function GateApp({ Component, pageProps }: AppProps): JSX.Element {
+  const [appSessionRef] = useState(
+    (): AppSessionRef => ({ current: null as unknown as AppSession }),
+  );
+
+  appSessionRef.current = new AppSession({
+    count: useState(AppSession.countInit),
+  });
+
   return (
-    <GateRefContextProvider>
+    <AppSessionContext.Provider value={appSessionRef}>
       <Component {...pageProps} />
-    </GateRefContextProvider>
+    </AppSessionContext.Provider>
   );
 }
 

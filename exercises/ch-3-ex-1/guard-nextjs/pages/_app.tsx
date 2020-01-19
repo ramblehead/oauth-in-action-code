@@ -18,9 +18,9 @@ function GateApp({ Component, pageProps }: AppProps): JSX.Element {
   );
 
   const update = useCallback(
-    (): void => setModelRef((prevRef: AppSessionRef): AppSessionRef => ({
-      current: prevRef.current,
-    })),
+    (): void => setModelRef((prevRef: AppSessionRef): AppSessionRef => (
+      { current: prevRef.current }
+    )),
     [setModelRef],
   );
 

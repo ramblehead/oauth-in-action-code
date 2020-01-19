@@ -5,36 +5,31 @@
 import React, {
   useState,
   useCallback,
-  createContext,
-  useContext,
-  Provider,
 } from 'react';
 
 import { AppProps } from 'next/app';
 // import App, { AppContext, AppInitialProps, AppProps } from 'next/app';
 
-import AppSession from '../session';
-
-interface AppSessionRef {
-  current: AppSession;
-}
-
-const AppSessionContext =
-  createContext<AppSessionRef>(null as unknown as AppSessionRef);
+import { appSession, AppSessionRefContext, AppSessionRef } from '../session';
 
 function GateApp({ Component, pageProps }: AppProps): JSX.Element {
-  const [appSessionRef] = useState(
-    (): AppSessionRef => ({ current: null as unknown as AppSession }),
+  const [appSessionRef, setModelRef] = useState(
+    (): AppSessionRef => ({ current: appSession }),
   );
 
-  appSessionRef.current = new AppSession({
-    count: useState(AppSession.countInit),
-  });
+  const update = useCallback(
+    (): void => setModelRef((prevRef: AppSessionRef): AppSessionRef => ({
+      current: prevRef.current,
+    })),
+    [setModelRef],
+  );
+
+  useState((): void => appSessionRef.current.setUpdateFunction(update));
 
   return (
-    <AppSessionContext.Provider value={appSessionRef}>
+    <AppSessionRefContext.Provider value={appSessionRef}>
       <Component {...pageProps} />
-    </AppSessionContext.Provider>
+    </AppSessionRefContext.Provider>
   );
 }
 

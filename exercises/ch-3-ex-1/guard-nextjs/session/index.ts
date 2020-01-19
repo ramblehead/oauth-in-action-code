@@ -1,29 +1,28 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-import {
-  Dispatch,
-  SetStateAction,
-} from 'react';
+import { createContext } from 'react';
 
-interface States {
-  count: [number, Dispatch<SetStateAction<number>>];
+type UpdateFunction = () => void;
+
+export class AppSession {
+  count = 0;
+
+  update(): void {
+    if(this._update) this._update();
+  }
+
+  setUpdateFunction(value: UpdateFunction): void {
+    this._update = value;
+  }
+
+  private _update: UpdateFunction | null = null;
 }
 
-export default class AppSession {
-  constructor(
-    private states: States,
-  ) {}
+export const appSession = new AppSession();
 
-  static get countInit(): number {
-    return 0;
-  }
-
-  get count(): number {
-    return this.states.count[0];
-  }
-
-  set count(value: number) {
-    const setCount = this.states.count[1];
-    setCount(value);
-  }
+export interface AppSessionRef {
+  current: AppSession;
 }
+
+export const AppSessionRefContext =
+  createContext<AppSessionRef>(null as unknown as AppSessionRef);

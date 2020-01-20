@@ -38,6 +38,37 @@ const Index: NextPage = () => {
         Up!
       </button>
       <p>Up! Clicks count = {appSession.count}</p>
+      <h1>OAuth Authorization Server</h1>
+      <h2>Client information:</h2>
+      <ul>
+        {appSession.clients.map((client) => (
+          <>
+            <li key="clientId">
+              <b>clientId:</b> {client.clientId}
+            </li>
+            <li key="clientSecret">
+              <b>clientSecret:</b> {client.clientSecret}
+            </li>
+            <li key="scope">
+              <b>scope:</b> {client.scope}
+            </li>
+            <li key="redirectUris">
+              <b>redirectUris:</b> {client.redirectUris}
+            </li>
+          </>
+        ))}
+      </ul>
+      <h2>Server information:</h2>
+      <ul>
+        <li key="authorizationEndpoint">
+          <b>authorizationEndpoint:</b>
+          {appSession.authServer.authorizationEndpoint}
+        </li>
+        <li>
+          <b>tokenEndpoint:</b>
+          {appSession.authServer.tokenEndpoint}
+        </li>
+      </ul>
     </div>
   );
 };

@@ -4,8 +4,34 @@ import { createContext } from 'react';
 
 type UpdateFunction = () => void;
 
+interface Request {
+  authorizationEndpointRequest: any;
+  scope: string[];
+  user: string;
+}
+
 export class AppSession {
   count = 0;
+
+  // authorization server information
+  readonly authServer = {
+    authorizationEndpoint: 'http://localhost:9001/authorize',
+    tokenEndpoint: 'http://localhost:9001/token',
+  };
+
+  // client information
+  readonly clients = [
+    {
+      clientId: 'oauth-client-1',
+      clientSecret: 'oauth-client-secret-1',
+      redirectUris: ['http://localhost:9000/callback'],
+      scope: 'foo bar',
+    },
+  ];
+
+  codes: { [code: string]: Request } = {};
+
+  requests = {};
 
   update(): void {
     if(this._update) this._update();

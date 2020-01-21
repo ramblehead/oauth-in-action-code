@@ -3,10 +3,14 @@
 import React from 'react';
 import { NextPage } from 'next';
 
+import { useRouter } from 'next/router';
+
 const Index: NextPage = () => {
+  const router = useRouter();
+
   return (
     <div>
-      <p>XXX</p>
+      <p>{router.asPath}</p>
     </div>
   );
 };

@@ -10,6 +10,13 @@ interface Request {
   user: string;
 }
 
+interface Client {
+  id: string,
+  secret: string,
+  redirectUris: string[],
+  scope: string,
+}
+
 export class AppSession {
   count = 0;
 
@@ -20,10 +27,10 @@ export class AppSession {
   };
 
   // client information
-  readonly clients = [
+  readonly clients: Client[] = [
     {
-      clientId: 'oauth-client-1',
-      clientSecret: 'oauth-client-secret-1',
+      id: 'oauth-client-1',
+      secret: 'oauth-client-secret-1',
       redirectUris: ['http://localhost:9000/callback'],
       scope: 'foo bar',
     },
@@ -32,6 +39,10 @@ export class AppSession {
   codes: { [code: string]: Request } = {};
 
   requests = {};
+
+  getClient(clientId: string): Client | undefined {
+    return this.clients.find((client) => client.id == clientId);
+  }
 
   update(): void {
     if(this._update) this._update();

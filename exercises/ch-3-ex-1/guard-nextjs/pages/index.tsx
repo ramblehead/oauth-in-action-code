@@ -44,10 +44,10 @@ const Index: NextPage = () => {
         {appSession.clients.map((client) => (
           <>
             <li key="clientId">
-              <b>clientId:</b> {client.clientId}
+              <b>clientId:</b> {client.id}
             </li>
             <li key="clientSecret">
-              <b>clientSecret:</b> {client.clientSecret}
+              <b>clientSecret:</b> {client.secret}
             </li>
             <li key="scope">
               <b>scope:</b> {client.scope}

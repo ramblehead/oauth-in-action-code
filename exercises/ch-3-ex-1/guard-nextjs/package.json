@@ -27,7 +27,8 @@
     "performance-now": "^2.1.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "yup": "^0.28.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.0",
@@ -38,6 +39,7 @@
     "@types/node": "^13.1.7",
     "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
+    "@types/yup": "^0.26.27",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
     "eslint": "^6.8.0",

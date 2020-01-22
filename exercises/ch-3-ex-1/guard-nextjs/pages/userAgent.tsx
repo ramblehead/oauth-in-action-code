@@ -10,21 +10,21 @@ const propTypes = {
 
 type Props = PropTypes.InferProps<typeof propTypes>;
 
-const defaultProps = {
-  userAgent: 'Undefined',
+const defaultProps: Props = {
+  userAgent: 'Unknown',
 };
 
-const page: NextPage<Props> = ({ userAgent }) => (
+const UserAgent: NextPage<Props> = ({ userAgent }) => (
   <main>Your user agent: {userAgent}</main>
 );
 
-page.propTypes = propTypes;
+UserAgent.propTypes = propTypes;
 
-page.defaultProps = defaultProps;
+UserAgent.defaultProps = defaultProps;
 
-page.getInitialProps = async ({ req }): Promise<Props> => {
+UserAgent.getInitialProps = async ({ req }): Promise<Props> => {
   const userAgent = req ? req.headers['user-agent'] : navigator.userAgent;
   return { userAgent };
 };
 
-export default page;
+export default UserAgent;

@@ -17,29 +17,32 @@ const querySchema = yup.object().shape({
 
 type Query = yup.InferType<typeof querySchema>;
 
-const Index: NextPage = () => {
+const Authorise: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);
   const router = useRouter();
 
   const query = router.query as Query;
 
-  // querySchema
-  //   .isValid(query)
-  //   .then(function(valid) {
-  //     valid;
-  //   });
-
   const queryIsValid = querySchema.isValidSync(query, { strict: true });
   const client = query.client_id;
+
+  if(!queryIsValid) return (
+    <div>
+      <p>
+        Incorrect {router.pathname} query:
+        <br />
+        {JSON.stringify(query)}
+      </p>
+    </div>
+  );
 
   return (
     <div>
       <p>{JSON.stringify(appSession.getClient(client))}</p>
       <p>{client}</p>
       <p>{JSON.stringify(query)}</p>
-      <p>{queryIsValid ? 'valid' : 'invalid'}</p>
     </div>
   );
 };
 
-export default Index;
+export default Authorise;

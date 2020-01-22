@@ -11,10 +11,10 @@ interface Request {
 }
 
 interface Client {
-  id: string,
-  secret: string,
-  redirectUris: string[],
-  scope: string,
+  id: string;
+  secret: string;
+  redirectUris: string[];
+  scope: string;
 }
 
 export class AppSession {
@@ -41,7 +41,7 @@ export class AppSession {
   requests = {};
 
   getClient(clientId: string): Client | undefined {
-    return this.clients.find((client) => client.id == clientId);
+    return this.clients.find((client) => client.id === clientId);
   }
 
   update(): void {

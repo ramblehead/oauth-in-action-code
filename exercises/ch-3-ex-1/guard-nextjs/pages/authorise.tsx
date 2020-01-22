@@ -1,21 +1,13 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import React, { useContext } from 'react';
 
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
-import * as yup from 'yup';
+import { querySchema, Query } from './api/authorise';
 
 import { AppSessionRefContext } from '../session';
-
-const querySchema = yup.object().shape({
-  client_id: yup.string().required(),
-}).noUnknown();
-
-type Query = yup.InferType<typeof querySchema>;
 
 const Authorise: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);

@@ -7,13 +7,13 @@ import React, { useContext } from 'react';
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
-import yup from 'yup';
+import * as yup from 'yup';
 
 import { AppSessionRefContext } from '../session';
 
 const querySchema = yup.object().shape({
   client_id: yup.string().required(),
-});
+}).noUnknown();
 
 type Query = yup.InferType<typeof querySchema>;
 
@@ -29,12 +29,15 @@ const Index: NextPage = () => {
   //     valid;
   //   });
 
+  const queryIsValid = querySchema.isValidSync(query, { strict: true });
   const client = query.client_id;
 
   return (
     <div>
       <p>{JSON.stringify(appSession.getClient(client))}</p>
       <p>{client}</p>
+      <p>{JSON.stringify(query)}</p>
+      <p>{queryIsValid ? 'valid' : 'invalid'}</p>
     </div>
   );
 };

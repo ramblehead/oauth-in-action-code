@@ -2,7 +2,6 @@
   "extends": "./.meta/rh-ts-library/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
     "jsx": "preserve",
     "lib": ["es2018", "dom", "esnext.asynciterable"],
     "module": "esnext",

@@ -25,7 +25,7 @@ export default (
 
   const queryIsValid = querySchema.isValidSync(query, { strict: true });
 
-  if(!queryIsValid) res.status(404);
+  if(!queryIsValid) res.status(404).end();
   else res.status(200).json({
     quote: 'Write tests, not too many, mostly integration',
     author: 'Guillermo Rauch',

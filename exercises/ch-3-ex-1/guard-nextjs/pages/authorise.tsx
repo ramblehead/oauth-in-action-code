@@ -2,6 +2,9 @@
 
 import React, { useContext } from 'react';
 
+import fetch from 'unfetch';
+import useSWR from 'swr';
+
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 
@@ -14,9 +17,16 @@ const Authorise: NextPage = () => {
   const router = useRouter();
 
   const query = router.query as Query;
-
   const queryIsValid = querySchema.isValidSync(query, { strict: true });
-  const client = query.client_id;
+
+  const api = `/api${router.asPath}`;
+  const { data, error } = useSWR(
+    queryIsValid ? api : null,
+    (url: string) => fetch(url).then((res) => {
+      if(res.status !== 200) throw res.status;
+      return res.json();
+    }),
+  );
 
   if(!queryIsValid) return (
     <div>
@@ -28,11 +38,16 @@ const Authorise: NextPage = () => {
     </div>
   );
 
+  const client = query.client_id;
+
   return (
     <div>
       <p>{JSON.stringify(appSession.getClient(client))}</p>
       <p>{client}</p>
+      <p>{router.asPath}</p>
       <p>{JSON.stringify(query)}</p>
+      <p>error: {JSON.stringify(error)}</p>
+      <p>data: {JSON.stringify(data)}</p>
     </div>
   );
 };

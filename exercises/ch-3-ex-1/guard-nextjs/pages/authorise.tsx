@@ -1,5 +1,7 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
+/* eslint-disable @typescript-eslint/ban-ts-ignore */
+
 import React, { useContext } from 'react';
 
 import fetch from 'unfetch';
@@ -7,6 +9,7 @@ import useSWR from 'swr';
 
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
+import Error from 'next/error';
 
 import { querySchema, Query } from './api/authorise';
 
@@ -19,24 +22,20 @@ const Authorise: NextPage = () => {
   const query = router.query as Query;
   const queryIsValid = querySchema.isValidSync(query, { strict: true });
 
-  const api = `/api${router.asPath}`;
+  const forward = `/api${router.asPath}`;
   const { data, error } = useSWR(
-    queryIsValid ? api : null,
+    queryIsValid ? forward : null,
     (url: string) => fetch(url).then((res) => {
-      if(res.status !== 200) throw res.status;
+      if(res.status > 200) throw res.status;
       return res.json();
     }),
   );
 
   if(!queryIsValid) return (
-    <div>
-      <p>
-        Incorrect {router.pathname} query:
-        <br />
-        {JSON.stringify(query)}
-      </p>
-    </div>
+    <Error statusCode={404} title={`Incorrect ${router.pathname} query`} />
   );
+
+  if(error) return <Error statusCode={error} />;
 
   const client = query.client_id;
 

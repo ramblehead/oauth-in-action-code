@@ -1,7 +1,12 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
 import React, { useContext } from 'react';
+
+import fetch from 'unfetch';
+import useSWR from 'swr';
+
 import Link from 'next/link';
+import Error from 'next/error';
 import { NextPage } from 'next';
 
 import { AppSessionRefContext } from '../session';
@@ -20,6 +25,16 @@ import { AppSessionRefContext } from '../session';
 
 const Index: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);
+
+  const { data: authServer, error } = useSWR(
+    '/api/authServer',
+    (url: string) => fetch(url).then((res) => {
+      if(res.status > 200) throw res.status;
+      return res.json();
+    }),
+  );
+
+  if(error) return <Error statusCode={error} />;
 
   return (
     <div>
@@ -62,11 +77,13 @@ const Index: NextPage = () => {
       <ul>
         <li key="authorizationEndpoint">
           <b>authorizationEndpoint:</b>
-          {appSession.authServer.authorizationEndpoint}
+          {' '}
+          {authServer ? authServer.authorizationEndpoint : ''}
         </li>
-        <li>
+        <li key="tokenEndpoint">
           <b>tokenEndpoint:</b>
-          {appSession.authServer.tokenEndpoint}
+          {' '}
+          {authServer ? authServer.tokenEndpoint : ''}
         </li>
       </ul>
     </div>

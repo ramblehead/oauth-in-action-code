@@ -11,22 +11,10 @@ import { NextPage } from 'next';
 
 import { AppSessionRefContext } from '../session';
 
-
-// import dynamic from 'next/dynamic';
-//
-// type ProcessTreeModule = typeof import('../components/ProcessTree');
-//
-// const ProcessTree = dynamic(
-//   (): Promise<ProcessTreeModule> => (
-//     import('../components/ProcessTree')
-//   ),
-//   { ssr: false },
-// );
-
 const Index: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);
 
-  const { data: authServer, error } = useSWR(
+  const { data: authServer, error: authServerError } = useSWR(
     '/api/authServer',
     (url: string) => fetch(url).then((res) => {
       if(res.status > 200) throw res.status;
@@ -34,7 +22,7 @@ const Index: NextPage = () => {
     }),
   );
 
-  if(error) return <Error statusCode={error} />;
+  if(authServerError) return <Error statusCode={authServerError} />;
 
   return (
     <div>
@@ -78,12 +66,12 @@ const Index: NextPage = () => {
         <li key="authorizationEndpoint">
           <b>authorizationEndpoint:</b>
           {' '}
-          {authServer ? authServer.authorizationEndpoint : ''}
+          {authServer ? authServer.authorizationEndpoint : 'loading...'}
         </li>
         <li key="tokenEndpoint">
           <b>tokenEndpoint:</b>
           {' '}
-          {authServer ? authServer.tokenEndpoint : ''}
+          {authServer ? authServer.tokenEndpoint : 'loading...'}
         </li>
       </ul>
     </div>

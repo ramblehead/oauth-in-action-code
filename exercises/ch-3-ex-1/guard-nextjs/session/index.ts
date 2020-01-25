@@ -20,12 +20,6 @@ interface Client {
 export class AppSession {
   count = 0;
 
-  // authorization server information
-  readonly authServer = {
-    authorizationEndpoint: 'http://localhost:9001/authorize',
-    tokenEndpoint: 'http://localhost:9001/token',
-  };
-
   // client information
   readonly clients: Client[] = [
     {

@@ -21,7 +21,7 @@ export interface Client {
   scope: string;
 }
 
-export const clients: Client[] = [
+const clients: Client[] = [
   {
     id: 'oauth-client-1',
     secret: 'oauth-client-secret-1',
@@ -29,3 +29,7 @@ export const clients: Client[] = [
     scope: 'foo bar',
   },
 ];
+
+export const getClient = (clientId: string): Client | undefined => (
+  clients.find((client) => client.id === clientId)
+);

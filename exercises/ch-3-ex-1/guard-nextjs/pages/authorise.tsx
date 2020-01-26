@@ -20,7 +20,7 @@ class FetchError extends Error {
 
   constructor(
     public status: number,
-    public statusText?: string,
+    public statusText: string,
   ) {
     super(statusText);
     if(Error.captureStackTrace) Error.captureStackTrace(this, FetchError);

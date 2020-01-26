@@ -9,33 +9,54 @@ import useSWR from 'swr';
 
 import { NextPage } from 'next';
 import { useRouter } from 'next/router';
-import Error from 'next/error';
+import NextError from 'next/error';
 
 import { querySchema, Query } from './api/authorise';
 
 import { AppSessionRefContext } from '../session';
+
+class FetchError extends Error {
+  name = 'FetchError';
+
+  constructor(
+    public status: number,
+    public statusText?: string,
+  ) {
+    super(statusText);
+    if(Error.captureStackTrace) Error.captureStackTrace(this, FetchError);
+  }
+}
 
 const Authorise: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);
   const router = useRouter();
 
   const query = router.query as Query;
-  const queryIsValid = querySchema.isValidSync(query, { strict: true });
+  const queryValid = querySchema.isValidSync(query, { strict: true });
 
-  const forward = `/api${router.asPath}`;
+  const path = `/api${router.asPath}`;
+
   const { data, error } = useSWR(
-    queryIsValid ? forward : null,
+    queryValid ? path : null,
     (url: string) => fetch(url).then((res) => {
-      if(res.status > 200) throw res.status;
+      if(res.status > 200) throw new FetchError(res.status, res.statusText);
       return res.json();
     }),
   );
 
-  if(!queryIsValid) return (
-    <Error statusCode={404} title={`Incorrect ${router.pathname} query`} />
+  if(!queryValid) return (
+    <NextError
+      statusCode={404}
+      title={`Invalid query: ${router.pathname}`}
+    />
   );
 
-  if(error) return <Error statusCode={error} />;
+  if(error) return (
+    <NextError
+      statusCode={error.status}
+      title={error.statusText}
+    />
+  );
 
   const client = query.client_id;
 

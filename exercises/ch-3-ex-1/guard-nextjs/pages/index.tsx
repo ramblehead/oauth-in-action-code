@@ -6,7 +6,7 @@ import fetch from 'unfetch';
 import useSWR from 'swr';
 
 import Link from 'next/link';
-import Error from 'next/error';
+import NextError from 'next/error';
 import { NextPage } from 'next';
 
 import { AppSessionRefContext } from '../session';
@@ -22,7 +22,7 @@ const Index: NextPage = () => {
     }),
   );
 
-  if(authServerError) return <Error statusCode={authServerError} />;
+  if(authServerError) return <NextError statusCode={authServerError} />;
 
   return (
     <div>

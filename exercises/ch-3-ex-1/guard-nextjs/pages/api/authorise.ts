@@ -17,18 +17,29 @@ export const querySchema = yup.object().shape({
 
 export type Query = yup.InferType<typeof querySchema>;
 
-type ResponseData = {
-  quote: string;
-  author: string;
+// type ResponseData = {
+//   quote: string;
+//   author: string;
+// }
+
+export interface ResponseId {
+  id: 'ok' | 'error';
 }
+
+export const responseErrorSchema = yup.object().shape({
+  id: yup.string().required(),
+  error_message: yup.string().required(),
+}).noUnknown();
+
+export type ResponseError = yup.InferType<typeof responseErrorSchema>;
 
 export default (
   req: NextApiRequest,
-  res: NextApiResponse<ResponseData>,
+  res: NextApiResponse<ResponseError>,
 ): void => {
   const query = req.query as Query;
-  const queryIsValid = querySchema.isValidSync(query, { strict: true });
-  if(!queryIsValid) {
+  const queryValid = querySchema.isValidSync(query, { strict: true });
+  if(!queryValid) {
     const invalidQueryErrorMessage = `Invalid query: ${req.url}`;
     res.statusCode = 404;
     res.statusMessage = invalidQueryErrorMessage;
@@ -40,14 +51,15 @@ export default (
 
   if(!client) {
     const unknownClientErrorMessage = `Unknown client: "${query.client_id}"`;
-    res.statusCode = 404;
-    res.statusMessage = unknownClientErrorMessage;
-    res.end();
+    res.status(200).json({
+      id: 'error',
+      error_message: unknownClientErrorMessage,
+    });
     return;
   }
 
   res.status(200).json({
-    quote: 'Write tests, not too many, mostly integration',
-    author: 'Guillermo Rauch',
+    id: 'ok',
+    error_message: 'No errors',
   });
 };

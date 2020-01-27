@@ -11,7 +11,13 @@ import { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import NextError from 'next/error';
 
-import { querySchema, Query } from './api/authorise';
+import {
+  querySchema,
+  Query,
+  responseErrorSchema,
+  ResponseId,
+  ResponseError,
+} from './api/authorise';
 
 import { AppSessionRefContext } from '../session';
 
@@ -36,7 +42,7 @@ const Authorise: NextPage = () => {
 
   const path = `/api${router.asPath}`;
 
-  const { data, error } = useSWR(
+  const { data: response, error } = useSWR(
     queryValid ? path : null,
     (url: string) => fetch(url).then((res) => {
       if(res.status > 200) throw new FetchError(res.status, res.statusText);
@@ -58,6 +64,27 @@ const Authorise: NextPage = () => {
     />
   );
 
+  if(response) {
+    const responseId = response as ResponseId;
+    if(responseId.id === 'error') {
+      const responseError = response as ResponseError;
+
+      const responseErrorValid =
+        responseErrorSchema.isValidSync(responseError, { strict: true });
+      if(!responseErrorValid) return (
+        <div>
+          <p>{`Invalid response: ${JSON.stringify(responseError)}`}</p>
+        </div>
+      );
+
+      return (
+        <div>
+          <p>{responseError.error_message}</p>
+        </div>
+      );
+    }
+  }
+
   const client = query.client_id;
 
   return (
@@ -67,7 +94,7 @@ const Authorise: NextPage = () => {
       <p>{router.asPath}</p>
       <p>{JSON.stringify(query)}</p>
       <p>error: {JSON.stringify(error)}</p>
-      <p>data: {JSON.stringify(data)}</p>
+      <p>data: {JSON.stringify(response)}</p>
     </div>
   );
 };

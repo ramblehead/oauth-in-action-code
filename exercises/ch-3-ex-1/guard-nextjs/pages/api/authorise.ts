@@ -6,7 +6,12 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import * as yup from 'yup';
 
-import { getClient, isValidRedirectUri, isValidScope } from '../../api-data';
+import {
+  getClient,
+  isValidRedirectUri,
+  isValidScope,
+  serverSession,
+} from '../../api-data';
 
 export const querySchema = yup.object().shape({
   // response_type: yup.string().required(),
@@ -30,6 +35,7 @@ export interface ResponseId {
 export const responseErrorSchema = yup.object().shape({
   id: yup.string().required(),
   error_message: yup.string().required(),
+  count: yup.number(),
 }).noUnknown();
 
 export type ResponseError = yup.InferType<typeof responseErrorSchema>;
@@ -90,5 +96,6 @@ export default (
   res.status(200).json({
     id: 'ok',
     error_message: 'No errors',
+    count: serverSession.count += 1,
   });
 };

@@ -47,3 +47,13 @@ export const isValidScope = (
 ): boolean => (
   scope ? scope.every((item) => client.scope.includes(item)) : true
 );
+
+export class ServerSession {
+  constructor() {
+    console.log('here');
+  }
+
+  count = 0;
+}
+
+export const serverSession = new ServerSession();

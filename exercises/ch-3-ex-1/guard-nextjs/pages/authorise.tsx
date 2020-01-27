@@ -14,9 +14,6 @@ import NextError from 'next/error';
 import {
   querySchema,
   Query,
-  responseErrorSchema,
-  ResponseId,
-  ResponseError,
 } from './api/authorise';
 
 import { AppSessionRefContext } from '../session';
@@ -52,7 +49,7 @@ const Authorise: NextPage = () => {
 
   if(!queryValid) return (
     <NextError
-      statusCode={404}
+      statusCode={400}
       title={`Invalid query: ${router.pathname}`}
     />
   );
@@ -64,26 +61,26 @@ const Authorise: NextPage = () => {
     />
   );
 
-  if(response) {
-    const responseId = response as ResponseId;
-    if(responseId.id === 'error') {
-      const responseError = response as ResponseError;
-
-      const responseErrorValid =
-        responseErrorSchema.isValidSync(responseError, { strict: true });
-      if(!responseErrorValid) return (
-        <div>
-          <p>{`Invalid response: ${JSON.stringify(responseError)}`}</p>
-        </div>
-      );
-
-      return (
-        <div>
-          <p>{responseError.error_message}</p>
-        </div>
-      );
-    }
-  }
+  // if(response) {
+  //   const responseId = response as ResponseId;
+  //   if(responseId.id === 'error') {
+  //     const responseError = response as ResponseError;
+  //
+  //     const responseErrorValid =
+  //       responseErrorSchema.isValidSync(responseError, { strict: true });
+  //     if(!responseErrorValid) return (
+  //       <div>
+  //         <p>{`Invalid response: ${JSON.stringify(responseError)}`}</p>
+  //       </div>
+  //     );
+  //
+  //     return (
+  //       <div>
+  //         <p>{responseError.error_message}</p>
+  //       </div>
+  //     );
+  //   }
+  // }
 
   const client = query.client_id;
 

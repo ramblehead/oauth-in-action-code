@@ -6,12 +6,13 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import * as yup from 'yup';
 
-import { getClient } from '../../api-data';
+import { getClient, isValidRedirectUri, isValidScope } from '../../api-data';
 
 export const querySchema = yup.object().shape({
   // response_type: yup.string().required(),
   client_id: yup.string().required(),
-  // redirect_uri: yup.string().required(),
+  redirect_uri: yup.string().required(),
+  scope: yup.string(),
   // state: yup.string().required(),
 }).noUnknown();
 
@@ -37,6 +38,14 @@ export default (
   req: NextApiRequest,
   res: NextApiResponse<ResponseError>,
 ): void => {
+  if(req.method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
+    const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;
+    res.statusCode = 405;
+    res.statusMessage = methodNotAllowedErrorMessage;
+    res.end();
+  }
+
   const query = req.query as Query;
   const queryValid = querySchema.isValidSync(query, { strict: true });
   if(!queryValid) {
@@ -50,11 +59,31 @@ export default (
   const client = getClient(query.client_id);
 
   if(!client) {
-    const unknownClientErrorMessage = `Unknown client: "${query.client_id}"`;
-    res.status(200).json({
-      id: 'error',
-      error_message: unknownClientErrorMessage,
-    });
+    const unknownClientErrorMessage = `Unknown client_id: "${query.client_id}"`;
+    res.statusCode = 404;
+    res.statusMessage = unknownClientErrorMessage;
+    res.end();
+    return;
+  }
+
+  const redirectUri = query.redirect_uri;
+
+  if(!isValidRedirectUri(client, redirectUri)) {
+    const invalidRedirectUriErrorMessage =
+      `Invalid Redirect URI: "${redirectUri}"`;
+    res.statusCode = 404;
+    res.statusMessage = invalidRedirectUriErrorMessage;
+    res.end();
+    return;
+  }
+
+  const requestedScope = query.scope ? query.scope.split(' ') : undefined;
+  if(!isValidScope(client, requestedScope)) {
+    const invalidRequestedScopeErrorMessage =
+      `Invalid Requested Scope: "${query.scope}"`;
+    res.statusCode = 404;
+    res.statusMessage = invalidRequestedScopeErrorMessage;
+    res.end();
     return;
   }
 

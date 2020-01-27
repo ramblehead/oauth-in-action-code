@@ -15,8 +15,12 @@ export default (
     case 'GET':
       res.status(200).json(authServer);
       break;
-    default:
+    default: {
       res.setHeader('Allow', ['GET']);
-      res.status(405).end(`Method ${method} Not Allowed`);
+      const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;
+      res.statusCode = 405;
+      res.statusMessage = methodNotAllowedErrorMessage;
+      res.end();
+    }
   }
 };

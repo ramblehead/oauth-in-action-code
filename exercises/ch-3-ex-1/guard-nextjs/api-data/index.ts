@@ -18,7 +18,7 @@ export interface Client {
   id: string;
   secret: string;
   redirectUris: string[];
-  scope: string;
+  scope: string[];
 }
 
 const clients: Client[] = [
@@ -26,10 +26,24 @@ const clients: Client[] = [
     id: 'oauth-client-1',
     secret: 'oauth-client-secret-1',
     redirectUris: ['http://localhost:9000/callback'],
-    scope: 'foo bar',
+    scope: ['foo', 'bar'],
   },
 ];
 
-export const getClient = (clientId: string): Client | undefined => (
+export const getClient = (
+  clientId: string,
+): Client | undefined => (
   clients.find((client) => client.id === clientId)
+);
+
+export const isValidRedirectUri = (
+  client: Client, uri: string,
+): string | undefined => (
+  client.redirectUris.find((redirectUri) => redirectUri === uri)
+);
+
+export const isValidScope = (
+  client: Client, scope: string[] | undefined,
+): boolean => (
+  scope ? scope.every((item) => client.scope.includes(item)) : true
 );

@@ -1,6 +1,7 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
 import * as yup from 'yup';
+import storage from 'node-persist';
 
 export const authServerSchema = yup.object().shape({
   authorizationEndpoint: yup.string().required(),
@@ -48,11 +49,14 @@ export const isValidScope = (
   scope ? scope.every((item) => client.scope.includes(item)) : true
 );
 
-export class ServerSession {
-  constructor() {
-    console.log('here');
-  }
+const initPromise = storage.init();
 
+export const getStorage = async (): Promise<typeof storage> => {
+  await initPromise;
+  return storage;
+};
+
+export class ServerSession {
   count = 0;
 }
 

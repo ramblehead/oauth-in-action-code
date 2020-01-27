@@ -40,10 +40,10 @@ export const responseErrorSchema = yup.object().shape({
 
 export type ResponseError = yup.InferType<typeof responseErrorSchema>;
 
-export default (
+export default async (
   req: NextApiRequest,
   res: NextApiResponse<ResponseError>,
-): void => {
+): Promise<void> => {
   if(req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;

@@ -82,4 +82,6 @@ export default async (
     error_message: 'No errors',
     count: serverSession.count += 1,
   });
+
+  await serverSession.save();
 };

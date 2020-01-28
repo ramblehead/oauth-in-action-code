@@ -1,8 +1,6 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-import fs from 'fs';
-// import path from 'path';
-// import * as yup from 'yup';
+import fs, { promises as fsp } from 'fs';
 
 export class ServerSession {
   // readonly fileName = path.join(__dirname, 'session.json');
@@ -13,19 +11,23 @@ export class ServerSession {
     else this.saveSync();
   }
 
-  saveSync(): void {
+  private saveSync(): void {
     const storeJson = JSON.stringify(this._store);
     fs.writeFileSync(this.fileName, storeJson);
   }
 
-  loadSync(): void {
+  private loadSync(): void {
     const storeJson = fs.readFileSync(this.fileName, 'utf8');
     this._store = JSON.parse(storeJson);
   }
 
+  async save() {
+    const storeJson = JSON.stringify(this._store);
+    return fsp.writeFile(this.fileName, storeJson);
+  }
+
   set count(value: number) {
     this._store.count = value;
-    this.saveSync();
   }
 
   get count(): number {

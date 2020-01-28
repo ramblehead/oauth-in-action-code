@@ -1,7 +1,18 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import * as yup from 'yup';
-import storage from 'node-persist';
+
+export const querySchema = yup.object().shape({
+  // response_type: yup.string().required(),
+  client_id: yup.string().required(),
+  redirect_uri: yup.string().required(),
+  scope: yup.string(),
+  // state: yup.string().required(),
+}).noUnknown();
+
+export type Query = yup.InferType<typeof querySchema>;
 
 export const authServerSchema = yup.object().shape({
   authorizationEndpoint: yup.string().required(),
@@ -48,16 +59,3 @@ export const isValidScope = (
 ): boolean => (
   scope ? scope.every((item) => client.scope.includes(item)) : true
 );
-
-const initPromise = storage.init();
-
-export const getStorage = async (): Promise<typeof storage> => {
-  await initPromise;
-  return storage;
-};
-
-export class ServerSession {
-  count = 0;
-}
-
-export const serverSession = new ServerSession();

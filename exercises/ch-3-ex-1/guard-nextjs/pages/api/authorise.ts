@@ -7,30 +7,14 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import * as yup from 'yup';
 
 import {
+  Query,
   getClient,
   isValidRedirectUri,
   isValidScope,
-  serverSession,
+  querySchema,
 } from '../../api-data';
 
-export const querySchema = yup.object().shape({
-  // response_type: yup.string().required(),
-  client_id: yup.string().required(),
-  redirect_uri: yup.string().required(),
-  scope: yup.string(),
-  // state: yup.string().required(),
-}).noUnknown();
-
-export type Query = yup.InferType<typeof querySchema>;
-
-// type ResponseData = {
-//   quote: string;
-//   author: string;
-// }
-
-export interface ResponseId {
-  id: 'ok' | 'error';
-}
+import { serverSession } from '../../api-data/session';
 
 export const responseErrorSchema = yup.object().shape({
   id: yup.string().required(),

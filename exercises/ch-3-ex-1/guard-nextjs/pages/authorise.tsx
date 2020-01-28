@@ -14,7 +14,7 @@ import NextError from 'next/error';
 import {
   querySchema,
   Query,
-} from './api/authorise';
+} from '../api-data';
 
 import { AppSessionRefContext } from '../session';
 

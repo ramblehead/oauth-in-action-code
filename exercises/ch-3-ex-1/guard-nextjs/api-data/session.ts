@@ -2,6 +2,12 @@
 
 import fs, { promises as fsp } from 'fs';
 
+import { Query } from './index'
+
+interface Requests {
+  [ id: string ]: Query;
+}
+
 export class ServerSession {
   // readonly fileName = path.join(__dirname, 'session.json');
   readonly fileName = 'session-store.json';
@@ -34,7 +40,12 @@ export class ServerSession {
     return this._store.count;
   }
 
+  get requests(): Requests {
+    return this._store.requests;
+  }
+
   private _store = {
+    requests: {} as Requests,
     count: 0,
   };
 }

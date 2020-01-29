@@ -59,3 +59,7 @@ export const isValidScope = (
 ): boolean => (
   scope ? scope.every((item) => client.scope.includes(item)) : true
 );
+
+export const randomStringGenerate = (count: number) => [...Array(count)].map(
+  () => Math.random().toString(36)[2],
+).join('');

@@ -4,6 +4,8 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
+import { randomStringGenerate } from '../../api-data';
+
 import * as yup from 'yup';
 
 import {
@@ -76,6 +78,9 @@ export default async (
     res.end();
     return;
   }
+
+  let id = randomStringGenerate(8);
+  serverSession.requests[id] = query;
 
   res.status(200).json({
     id: 'ok',

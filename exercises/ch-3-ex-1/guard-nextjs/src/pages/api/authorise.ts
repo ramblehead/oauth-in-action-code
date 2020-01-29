@@ -4,9 +4,9 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { randomStringGenerate } from '../../api-data';
-
 import * as yup from 'yup';
+
+import { serverSession } from '../../api';
 
 import {
   Query,
@@ -14,14 +14,13 @@ import {
   isValidRedirectUri,
   isValidScope,
   querySchema,
-} from '../../api-data';
-
-import { serverSession } from '../../api-data/session';
+  randomStringGenerate,
+} from '../../api/authorise';
 
 export const responseErrorSchema = yup.object().shape({
   id: yup.string().required(),
   error_message: yup.string().required(),
-  count: yup.number(),
+  // count: yup.number(),
 }).noUnknown();
 
 export type ResponseError = yup.InferType<typeof responseErrorSchema>;
@@ -79,14 +78,11 @@ export default async (
     return;
   }
 
-  let id = randomStringGenerate(8);
-  serverSession.requests[id] = query;
+  const id = randomStringGenerate(8);
+  serverSession.requests.set(id, query);
 
   res.status(200).json({
     id: 'ok',
     error_message: 'No errors',
-    count: serverSession.count += 1,
   });
-
-  await serverSession.save();
 };

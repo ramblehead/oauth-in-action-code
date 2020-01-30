@@ -4,30 +4,23 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import * as yup from 'yup';
-
-import { serverSession } from '../../api';
+import {
+  serverSession,
+  randomStringGenerate,
+} from '../../api';
 
 import {
   Query,
+  Response,
   getClient,
   isValidRedirectUri,
   isValidScope,
   querySchema,
-  randomStringGenerate,
 } from '../../api/authorise';
-
-export const responseErrorSchema = yup.object().shape({
-  id: yup.string().required(),
-  error_message: yup.string().required(),
-  // count: yup.number(),
-}).noUnknown();
-
-export type ResponseError = yup.InferType<typeof responseErrorSchema>;
 
 export default async (
   req: NextApiRequest,
-  res: NextApiResponse<ResponseError>,
+  res: NextApiResponse<Response>,
 ): Promise<void> => {
   if(req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -83,6 +76,5 @@ export default async (
 
   res.status(200).json({
     id: 'ok',
-    error_message: 'No errors',
   });
 };

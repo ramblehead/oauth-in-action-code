@@ -14,6 +14,7 @@ import NextError from 'next/error';
 import {
   querySchema,
   Query,
+  Response,
 } from '../api/authorise';
 
 import { AppSessionRefContext } from '../session';
@@ -45,7 +46,10 @@ const Authorise: NextPage = () => {
       if(res.status > 200) throw new FetchError(res.status, res.statusText);
       return res.json();
     }),
-  );
+  ) as {
+    data: Response;
+    error: FetchError;
+  };
 
   if(!queryValid) return (
     <NextError

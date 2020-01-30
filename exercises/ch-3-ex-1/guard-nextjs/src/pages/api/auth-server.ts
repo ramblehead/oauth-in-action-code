@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authServer, AuthServer } from '../../api/authorise';
+import { authServer, AuthServer } from '../../api/auth-server';
 
 export default (
   req: NextApiRequest,

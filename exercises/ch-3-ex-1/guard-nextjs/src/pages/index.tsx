@@ -15,7 +15,7 @@ const Index: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);
 
   const { data: authServer, error: authServerError } = useSWR(
-    '/api/authServer',
+    '/api/auth-server',
     (url: string) => fetch(url).then((res) => {
       if(res.status > 200) throw res.status;
       return res.json();

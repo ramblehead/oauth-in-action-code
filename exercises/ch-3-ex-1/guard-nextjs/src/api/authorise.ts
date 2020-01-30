@@ -4,6 +4,15 @@
 
 import * as yup from 'yup';
 
+const clients: Client[] = [
+  {
+    id: 'oauth-client-1',
+    secret: 'oauth-client-secret-1',
+    redirectUris: ['http://localhost:9000/callback'],
+    scope: ['foo', 'bar'],
+  },
+];
+
 export const querySchema = yup.object().shape({
   // response_type: yup.string().required(),
   client_id: yup.string().required(),
@@ -14,17 +23,12 @@ export const querySchema = yup.object().shape({
 
 export type Query = yup.InferType<typeof querySchema>;
 
-export const authServerSchema = yup.object().shape({
-  authorizationEndpoint: yup.string().required(),
-  tokenEndpoint: yup.string().required(),
+export const responseSchema = yup.object().shape({
+  id: yup.string().required(),
+  error_message: yup.string().notRequired(),
 }).noUnknown();
 
-export type AuthServer = yup.InferType<typeof authServerSchema>;
-
-export const authServer: AuthServer = {
-  authorizationEndpoint: 'http://localhost:9001/authorize',
-  tokenEndpoint: 'http://localhost:9001/token',
-};
+export type Response = yup.InferType<typeof responseSchema>;
 
 export interface Client {
   id: string;
@@ -32,15 +36,6 @@ export interface Client {
   redirectUris: string[];
   scope: string[];
 }
-
-const clients: Client[] = [
-  {
-    id: 'oauth-client-1',
-    secret: 'oauth-client-secret-1',
-    redirectUris: ['http://localhost:9000/callback'],
-    scope: ['foo', 'bar'],
-  },
-];
 
 export const getClient = (
   clientId: string,
@@ -59,9 +54,3 @@ export const isValidScope = (
 ): boolean => (
   scope ? scope.every((item) => client.scope.includes(item)) : true
 );
-
-export const randomStringGenerate = (
-  count: number,
-): string => [...Array(count)].map(
-  () => Math.random().toString(36)[2],
-).join('');

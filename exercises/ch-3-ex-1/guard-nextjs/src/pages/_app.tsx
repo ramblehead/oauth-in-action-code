@@ -12,7 +12,7 @@ import { AppProps } from 'next/app';
 
 import { appSession, AppSessionRefContext, AppSessionRef } from '../session';
 
-function GateApp({ Component, pageProps }: AppProps): JSX.Element {
+const GateApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   const [appSessionRef, setModelRef] = useState(
     (): AppSessionRef => ({ current: appSession }),
   );
@@ -31,7 +31,7 @@ function GateApp({ Component, pageProps }: AppProps): JSX.Element {
       <Component {...pageProps} />
     </AppSessionRefContext.Provider>
   );
-}
+};
 
 // Only uncomment this method if you have blocking data requirements for
 // every single page in your application. This disables the ability to

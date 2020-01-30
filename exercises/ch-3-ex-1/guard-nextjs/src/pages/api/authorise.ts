@@ -11,7 +11,7 @@ import {
 
 import {
   Query,
-  Response,
+  InternalResponse,
   getClient,
   isValidRedirectUri,
   isValidScope,
@@ -20,7 +20,7 @@ import {
 
 export default async (
   req: NextApiRequest,
-  res: NextApiResponse<Response>,
+  res: NextApiResponse<InternalResponse>,
 ): Promise<void> => {
   if(req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -71,10 +71,8 @@ export default async (
     return;
   }
 
-  const id = randomStringGenerate(8);
-  serverSession.requests.set(id, query);
+  const requestId = randomStringGenerate(8);
+  serverSession.requests.set(requestId, query);
 
-  res.status(200).json({
-    id: 'ok',
-  });
+  res.status(200).json({ request_id: requestId });
 };

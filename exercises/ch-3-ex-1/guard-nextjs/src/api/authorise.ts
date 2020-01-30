@@ -23,12 +23,12 @@ export const querySchema = yup.object().shape({
 
 export type Query = yup.InferType<typeof querySchema>;
 
-export const responseSchema = yup.object().shape({
-  id: yup.string().required(),
-  error_message: yup.string().notRequired(),
+export const internalResponseSchema = yup.object().shape({
+  request_id: yup.string().required(),
+  // scope: yup.array().of(yup.string()),
 }).noUnknown();
 
-export type Response = yup.InferType<typeof responseSchema>;
+export type InternalResponse = yup.InferType<typeof internalResponseSchema>;
 
 export interface Client {
   id: string;

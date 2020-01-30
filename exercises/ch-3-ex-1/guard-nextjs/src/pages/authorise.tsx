@@ -1,8 +1,7 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-/* eslint-disable @typescript-eslint/ban-ts-ignore */
-
-import React, { useContext } from 'react';
+import React from 'react';
+// import React, { useContext } from 'react';
 
 import fetch from 'unfetch';
 import useSWR from 'swr';
@@ -14,10 +13,10 @@ import NextError from 'next/error';
 import {
   querySchema,
   Query,
-  Response,
+  InternalResponse,
 } from '../api/authorise';
 
-import { AppSessionRefContext } from '../session';
+// import { AppSessionRefContext } from '../session';
 
 class FetchError extends Error {
   name = 'FetchError';
@@ -32,7 +31,7 @@ class FetchError extends Error {
 }
 
 const Authorise: NextPage = () => {
-  const { current: appSession } = useContext(AppSessionRefContext);
+  // const { current: appSession } = useContext(AppSessionRefContext);
   const router = useRouter();
 
   const query = router.query as Query;
@@ -40,16 +39,13 @@ const Authorise: NextPage = () => {
 
   const path = `/api${router.asPath}`;
 
-  const { data: response, error } = useSWR(
+  const { data: response, error } = useSWR<InternalResponse, FetchError>(
     queryValid ? path : null,
     (url: string) => fetch(url).then((res) => {
       if(res.status > 200) throw new FetchError(res.status, res.statusText);
       return res.json();
     }),
-  ) as {
-    data: Response;
-    error: FetchError;
-  };
+  );
 
   if(!queryValid) return (
     <NextError
@@ -65,39 +61,43 @@ const Authorise: NextPage = () => {
     />
   );
 
-  // if(response) {
-  //   const responseId = response as ResponseId;
-  //   if(responseId.id === 'error') {
-  //     const responseError = response as ResponseError;
+  // const client = query.client_id;
   //
-  //     const responseErrorValid =
-  //       responseErrorSchema.isValidSync(responseError, { strict: true });
-  //     if(!responseErrorValid) return (
-  //       <div>
-  //         <p>{`Invalid response: ${JSON.stringify(responseError)}`}</p>
-  //       </div>
-  //     );
-  //
-  //     return (
-  //       <div>
-  //         <p>{responseError.error_message}</p>
-  //       </div>
-  //     );
-  //   }
-  // }
+  // return (
+  //   <div>
+  //     <p>{JSON.stringify(appSession.getClient(client))}</p>
+  //     <p>{client}</p>
+  //     <p>{router.asPath}</p>
+  //     <p>{JSON.stringify(query)}</p>
+  //     <p>error: {JSON.stringify(error)}</p>
+  //     <p>data: {JSON.stringify(response)}</p>
+  //   </div>
+  // );
 
-  const client = query.client_id;
+  const requestId = response ? response.request_id : '';
+  // const scope = response ? response.scope : [];
 
   return (
     <div>
-      <p>{JSON.stringify(appSession.getClient(client))}</p>
-      <p>{client}</p>
-      <p>{router.asPath}</p>
-      <p>{JSON.stringify(query)}</p>
-      <p>error: {JSON.stringify(error)}</p>
-      <p>data: {JSON.stringify(response)}</p>
+      <h2>Approve this client?</h2>
+      <p><b>ID:</b> <code>{query.client_id}</code></p>
+      <form action="/approve" method="POST">
+        <input type="hidden" name="reqid" value={requestId} />
+        <input type="submit" name="approve" value="Approve" />
+        <input type="submit" name="deny" value="Deny" />
+      </form>
     </div>
   );
+
+
+  // {scope.map((id) => (
+  //   <>
+  //     <li key={id}}>
+  //       <b>:</b> {client.id}
+  //     </li>
+  //   </>
+  // ))}
+  //
 };
 
 export default Authorise;

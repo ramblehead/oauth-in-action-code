@@ -71,7 +71,15 @@ const Authorise: NextPage = () => {
       <ul>
         {scopes.map((scope) => (
           <>
-            <li key={scope}>{scope}</li>
+            <li key={scope}>
+              <input
+                type="checkbox"
+                name={`scope_${scope}`}
+                id={`scope_${scope}`}
+                checked
+              />
+              <label htmlFor={`scope_${scope}`}>{scope}</label>
+            </li>
           </>
         ))}
       </ul>

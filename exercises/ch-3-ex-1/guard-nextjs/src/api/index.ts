@@ -2,7 +2,7 @@
 
 /* eslint-disable import/prefer-default-export */
 
-import ServerSession from './server-session';
+import ServerSession from './serverSession';
 
 export const randomStringGenerate = (
   count: number,

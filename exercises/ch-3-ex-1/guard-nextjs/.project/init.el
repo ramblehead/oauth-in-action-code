@@ -1,81 +1,71 @@
 ;; -*- coding: utf-8 -*-
 
-(defvar artizanya-guard-nextjs-lint-buffer-name
-  "*@artizanya/guard-nextjs-lint*")
+(require 'hydra)
 
-(defvar artizanya-guard-nextjs-make-buffer-name
-  "*@artizanya/guard-nextjs-make*")
+(defvar oauthia-guard-nextjs-lint-buffer-name
+  "*@oauth/guard-nextjs-lint*")
 
-(defvar artizanya-guard-nextjs-dev-buffer-name
-  "*@artizanya/guard-nextjs-dev*")
+(defvar oauthia-guard-nextjs-run-buffer-name
+  "*@oauth/guard-nextjs-run*")
 
-(defvar artizanya-guard-nextjs-build-buffer-name
-  "*@artizanya/guard-nextjs-build*")
+(defvar oauthia-guard-nextjs-build-buffer-name
+  "*@oauth/guard-nextjs-build*")
 
-(defun artizanya-guard-nextjs-lint ()
+(defun oauthia-guard-nextjs-lint ()
   (interactive)
   (rh-project-compile
    "lint"
-   artizanya-guard-nextjs-lint-buffer-name))
+   oauthia-guard-nextjs-lint-buffer-name))
 
-;; (defun artizanya-guard-nextjs-make ()
-;;   (interactive)
-;;   (rh-project-compile
-;;    "make"
-;;    artizanya-guard-nextjs-make-buffer-name))
-
-;; (defun artizanya-guard-nextjs-clean ()
-;;   (interactive)
-;;   (rh-project-compile
-;;    "clean"
-;;    artizanya-guard-nextjs-make-buffer-name))
-
-(defun artizanya-guard-nextjs-dev ()
-  (interactive)
-  (rh-project-compile
-   "dev"
-   artizanya-guard-nextjs-dev-buffer-name))
-
-(defun artizanya-guard-nextjs-build ()
+(defun oauthia-guard-nextjs-build ()
   (interactive)
   (rh-project-compile
    "build"
-   artizanya-guard-nextjs-build-buffer-name))
+   oauthia-guard-nextjs-build-buffer-name))
 
-;; (defun artizanya-guard-nextjs-kill ()
-;;   (interactive)
-;;   (rh-project-kill-shell-process
-;;    artizanya-guard-nextjs-dev-buffer-name))
+(defun oauthia-guard-nextjs-dev ()
+  (interactive)
+  (rh-project-restart-shell-command
+   "dev"
+   oauthia-guard-nextjs-run-buffer-name))
 
-(defun artizanya-guard-nextjs-hydra-define ()
-  (defhydra artizanya-guard-nextjs-hydra (:color blue :columns 5)
-    "@artizanya/guard-nextjs project commands"
-    ("l" artizanya-guard-nextjs-lint
+(defun oauthia-guard-nextjs-start ()
+  (interactive)
+  (rh-project-restart-shell-command
+   "start"
+   oauthia-guard-nextjs-run-buffer-name))
+
+(defun oauthia-guard-nextjs-stop ()
+  (interactive)
+  (rh-project-kill-shell-process
+   oauthia-guard-nextjs-run-buffer-name))
+
+(defun oauthia-guard-nextjs-hydra-define ()
+  (defhydra oauthia-guard-nextjs-hydra (:color blue :columns 5)
+    "@oauthia/ch-3-ex1-client/guard-nextjs project commands"
+    ("l" oauthia-guard-nextjs-lint
      "lint")
-    ;; ("b" artizanya-guard-nextjs-make
-    ;;  "make")
-    ;; ("c" artizanya-guard-nextjs-clean
-    ;;  "clean")
-    ("d" artizanya-guard-nextjs-dev
-     "dev")
-    ("b" artizanya-guard-nextjs-build
+    ("b" oauthia-guard-nextjs-build
      "build")
-    ;; ("R" artizanya-guard-nextjs-kill
-    ;;  "kill")
-    ))
+    ("d" oauthia-guard-nextjs-dev
+     "dev")
+    ("s" oauthia-guard-nextjs-start
+     "start")
+    ("S" oauthia-guard-nextjs-stop
+     "stop")))
 
-(artizanya-guard-nextjs-hydra-define)
+(oauthia-guard-nextjs-hydra-define)
 
-(define-minor-mode artizanya-guard-nextjs-mode
-  "artizanya-guard-nextjs-mode project-specific minor mode."
-  :lighter " artizanya-guard-nextjs"
+(define-minor-mode oauthia-guard-nextjs-mode
+  "oauthia-guard-nextjs-mode project-specific minor mode."
+  :lighter " oauthia-guard-nextjs"
   :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "<f9>") #'artizanya-guard-nextjs-hydra/body)
+            (define-key map (kbd "<f9>") #'oauthia-guard-nextjs-hydra/body)
             map))
 
-(add-to-list 'rm-blacklist " artizanya-guard-nextjs")
+(add-to-list 'rm-blacklist " oauthia-guard-nextjs")
 
-(defun artizanya-guard-nextjs-setup ()
+(defun oauthia-guard-nextjs-setup ()
   (let ((project-root (rh-project-get-root))
         file-rpath ext-js)
     (when project-root

@@ -3,17 +3,17 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authServer, AuthServer } from '../../api/auth-server';
+import { authServerConfig, AuthServerConfig } from '../../api/auth-server';
 
-export default (
+const authServer = (
   req: NextApiRequest,
-  res: NextApiResponse<AuthServer>,
+  res: NextApiResponse<AuthServerConfig>,
 ): void => {
   const { method } = req;
 
   switch (method) {
     case 'GET':
-      res.status(200).json(authServer);
+      res.status(200).json(authServerConfig);
       break;
     default: {
       res.setHeader('Allow', ['GET']);
@@ -24,3 +24,5 @@ export default (
     }
   }
 };
+
+export default authServer;

@@ -2,14 +2,14 @@
 
 import * as yup from 'yup';
 
-export const authServer: AuthServer = {
+export const authServerConfig: AuthServerConfig = {
   authorizationEndpoint: 'http://localhost:9001/authorize',
   tokenEndpoint: 'http://localhost:9001/token',
 };
 
-export const authServerSchema = yup.object().shape({
+export const authServerConfigSchema = yup.object().shape({
   authorizationEndpoint: yup.string().required(),
   tokenEndpoint: yup.string().required(),
 }).noUnknown();
 
-export type AuthServer = yup.InferType<typeof authServerSchema>;
+export type AuthServerConfig = yup.InferType<typeof authServerConfigSchema>;

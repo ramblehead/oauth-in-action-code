@@ -7,12 +7,14 @@ type ResponseData = {
   author: string;
 }
 
-export default (
+const randomQuote = async (
   _req: NextApiRequest,
   res: NextApiResponse<ResponseData>,
-): void => {
+): Promise<void> => {
   res.status(200).json({
     quote: 'Write tests, not too many, mostly integration',
     author: 'Guillermo Rauch',
   });
 };
+
+export default randomQuote;

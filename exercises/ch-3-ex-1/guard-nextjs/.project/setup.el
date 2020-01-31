@@ -1,4 +1,4 @@
 ;; -*- coding: utf-8 -*-
 
-(artizanya-guard-nextjs-mode 1)
-(artizanya-guard-nextjs-setup)
+(oauthia-guard-nextjs-mode 1)
+(oauthia-guard-nextjs-setup)

@@ -52,7 +52,7 @@ const Authorise: NextPage = () => {
     scopesSelection: {},
   });
 
-  const { fetchError } = useSWR<InternalResponse, FetchError>(
+  const { error: fetchError } = useSWR<InternalResponse, FetchError>(
     queryValid ? path : null,
     (url: string) => fetch(url).then(async (res) => {
       if(res.status > 200) throw new FetchError(res.status, res.statusText);

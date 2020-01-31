@@ -68,22 +68,20 @@ const Authorise: NextPage = () => {
     <div>
       <h2>Approve this client?</h2>
       <p><b>ID:</b> <code>{query.client_id}</code></p>
-      <ul>
-        {scopes.map((scope) => (
-          <>
+      <form action="/api/approve" method="POST">
+        <ul>
+          {scopes.map((scope) => (
             <li key={scope}>
               <input
                 type="checkbox"
                 name={`scope_${scope}`}
                 id={`scope_${scope}`}
-                checked
+                defaultChecked
               />
               <label htmlFor={`scope_${scope}`}>{scope}</label>
             </li>
-          </>
-        ))}
-      </ul>
-      <form action="/api/approve" method="POST">
+          ))}
+        </ul>
         <input type="hidden" name="reqid" value={requestId} />
         <input type="submit" name="approval" value="approved" />
         <input type="submit" name="approval" value="denied" />

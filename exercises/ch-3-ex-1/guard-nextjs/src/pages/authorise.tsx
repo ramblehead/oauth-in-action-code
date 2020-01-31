@@ -75,29 +75,26 @@ const Authorise: NextPage = () => {
   // );
 
   const requestId = response ? response.request_id : '';
-  // const scope = response ? response.scope : [];
+  const scopes = response ? response.scopes : [];
 
   return (
     <div>
       <h2>Approve this client?</h2>
       <p><b>ID:</b> <code>{query.client_id}</code></p>
-      <form action="/approve" method="POST">
+      <ul>
+        {scopes.map((scope) => (
+          <>
+            <li key={scope}>{scope}</li>
+          </>
+        ))}
+      </ul>
+      <form action="/api/approve" method="POST">
         <input type="hidden" name="reqid" value={requestId} />
-        <input type="submit" name="approve" value="Approve" />
-        <input type="submit" name="deny" value="Deny" />
+        <input type="submit" name="approval" value="approved" />
+        <input type="submit" name="approval" value="denied" />
       </form>
     </div>
   );
-
-
-  // {scope.map((id) => (
-  //   <>
-  //     <li key={id}}>
-  //       <b>:</b> {client.id}
-  //     </li>
-  //   </>
-  // ))}
-  //
 };
 
 export default Authorise;

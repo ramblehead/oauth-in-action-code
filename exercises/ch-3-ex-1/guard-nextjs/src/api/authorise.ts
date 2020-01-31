@@ -25,7 +25,7 @@ export type Query = yup.InferType<typeof querySchema>;
 
 export const internalResponseSchema = yup.object().shape({
   request_id: yup.string().required(),
-  // scope: yup.array().of(yup.string()),
+  scopes: yup.array().of(yup.string()),
 }).noUnknown();
 
 export type InternalResponse = yup.InferType<typeof internalResponseSchema>;
@@ -43,13 +43,13 @@ export const getClient = (
   clients.find((client) => client.id === clientId)
 );
 
-export const isValidRedirectUri = (
+export const redirectUriValid = (
   client: Client, uri: string,
 ): string | undefined => (
   client.redirectUris.find((redirectUri) => redirectUri === uri)
 );
 
-export const isValidScope = (
+export const scopesAllowed = (
   client: Client, scope: string[] | undefined,
 ): boolean => (
   scope ? scope.every((item) => client.scope.includes(item)) : true

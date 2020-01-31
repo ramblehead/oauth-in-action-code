@@ -61,19 +61,6 @@ const Authorise: NextPage = () => {
     />
   );
 
-  // const client = query.client_id;
-  //
-  // return (
-  //   <div>
-  //     <p>{JSON.stringify(appSession.getClient(client))}</p>
-  //     <p>{client}</p>
-  //     <p>{router.asPath}</p>
-  //     <p>{JSON.stringify(query)}</p>
-  //     <p>error: {JSON.stringify(error)}</p>
-  //     <p>data: {JSON.stringify(response)}</p>
-  //   </div>
-  // );
-
   const requestId = response ? response.request_id : '';
   const scopes = response ? response.scopes : [];
 

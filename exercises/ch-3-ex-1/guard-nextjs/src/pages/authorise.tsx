@@ -1,7 +1,6 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-import React from 'react';
-// import React, { useContext } from 'react';
+import React, { FormEvent, useState, ChangeEvent } from 'react';
 
 import fetch from 'unfetch';
 import useSWR from 'swr';
@@ -30,6 +29,15 @@ class FetchError extends Error {
   }
 }
 
+interface ScopesSelection {
+  [ scope: string ]: boolean;
+}
+
+interface State {
+  requestId: string;
+  scopesSelection: ScopesSelection;
+}
+
 const Authorise: NextPage = () => {
   // const { current: appSession } = useContext(AppSessionRefContext);
   const router = useRouter();
@@ -39,12 +47,32 @@ const Authorise: NextPage = () => {
 
   const path = `/api${router.asPath}`;
 
-  const { data: response, error } = useSWR<InternalResponse, FetchError>(
+  const [state, setState] = useState<State>({
+    requestId: '',
+    scopesSelection: {},
+  });
+
+  const { fetchError } = useSWR<InternalResponse, FetchError>(
     queryValid ? path : null,
-    (url: string) => fetch(url).then((res) => {
+    (url: string) => fetch(url).then(async (res) => {
       if(res.status > 200) throw new FetchError(res.status, res.statusText);
-      return res.json();
+      const response: InternalResponse = await res.json();
+      const requestId = response ? response.request_id : '';
+      const scopes = response ? response.scopes : [];
+      const scopesSelection: ScopesSelection = {};
+      scopes.forEach((scope) => {
+        scopesSelection[scope] = true;
+      });
+      setState({ requestId, scopesSelection });
+      return response;
     }),
+  );
+
+  if(fetchError) return (
+    <NextError
+      statusCode={fetchError.status}
+      title={fetchError.statusText}
+    />
   );
 
   if(!queryValid) return (
@@ -54,37 +82,46 @@ const Authorise: NextPage = () => {
     />
   );
 
-  if(error) return (
-    <NextError
-      statusCode={error.status}
-      title={error.statusText}
-    />
-  );
+  const submitHandler = (event: FormEvent<HTMLFormElement>): void => {
+    console.log(state);
+    event.preventDefault();
+  };
 
-  const requestId = response ? response.request_id : '';
-  const scopes = response ? response.scopes : [];
+  const scopeSelectionOnChangeHandler = (
+    event: ChangeEvent<HTMLInputElement>,
+  ): void => {
+    const { name, checked } = event.target;
+    setState((prevState): State => {
+      const newState = { ...prevState };
+      newState.scopesSelection = {
+        ...prevState.scopesSelection,
+        [name]: checked,
+      };
+      return newState;
+    });
+  };
 
   return (
     <div>
       <h2>Approve this client?</h2>
       <p><b>ID:</b> <code>{query.client_id}</code></p>
-      <form action="/api/approve" method="POST">
+      <form onSubmit={submitHandler}>
         <ul>
-          {scopes.map((scope) => (
+          {Object.entries(state.scopesSelection).map(([scope, selected]) => (
             <li key={scope}>
               <input
                 type="checkbox"
-                name={`scope_${scope}`}
-                id={`scope_${scope}`}
-                defaultChecked
+                name={scope}
+                id={`${scope}Checkbox`}
+                checked={selected}
+                onChange={scopeSelectionOnChangeHandler}
               />
-              <label htmlFor={`scope_${scope}`}>{scope}</label>
+              <label htmlFor={`${scope}Checkbox`}>{scope}</label>
             </li>
           ))}
         </ul>
-        <input type="hidden" name="reqid" value={requestId} />
-        <input type="submit" name="approval" value="approved" />
-        <input type="submit" name="approval" value="denied" />
+        <input type="submit" name="approve" value="Approve" />
+        <input type="submit" name="denie" value="Denie" />
       </form>
     </div>
   );

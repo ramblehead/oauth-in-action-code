@@ -17,7 +17,11 @@ const approve = async (
     return;
   }
 
-  res.status(200).send(req.body);
+  res.status(200).send(JSON.stringify(req.body));
+
+  // res.status(200).send(req.body);
+  // res.status(200).end();
+
   // res.status(200).end();
 };
 

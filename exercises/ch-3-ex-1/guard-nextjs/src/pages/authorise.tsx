@@ -1,12 +1,16 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-import React, { FormEvent, useState, ChangeEvent } from 'react';
+/* eslint-disable dot-notation */
 
-import fetch from 'unfetch';
-import useSWR from 'swr';
+import React, { FormEvent, useState, ChangeEvent } from 'react';
+import PropTypes from 'prop-types';
+
+// import fetch from 'unfetch';
+// import useSWR from 'swr';
+import fetch from 'isomorphic-unfetch';
+import absoluteUrl from 'next-absolute-url';
 
 import { NextPage } from 'next';
-import { useRouter } from 'next/router';
 import NextError from 'next/error';
 
 import {
@@ -15,70 +19,45 @@ import {
   InternalResponse,
 } from '../api/authorise';
 
-// import { AppSessionRefContext } from '../session';
+const propTypes = {
+  requestId: PropTypes.string.isRequired,
+  scopesSelectionInitial:
+    PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
+  error: PropTypes.shape({
+    status: PropTypes.number.isRequired,
+    statusText: PropTypes.string.isRequired,
+  }),
+};
 
-class FetchError extends Error {
-  name = 'FetchError';
+const defaultProps = {
+  error: undefined,
+};
 
-  constructor(
-    public status: number,
-    public statusText: string,
-  ) {
-    super(statusText);
-    if(Error.captureStackTrace) Error.captureStackTrace(this, FetchError);
-  }
-}
+type Props = PropTypes.InferProps<typeof propTypes>;
 
 interface ScopesSelection {
   [ scope: string ]: boolean;
 }
 
 interface State {
-  requestId: string;
   scopesSelection: ScopesSelection;
 }
 
-const Authorise: NextPage = () => {
+const Authorise: NextPage<Props> = ({
+  requestId,
+  scopesSelectionInitial,
+  error,
+}) => {
   // const { current: appSession } = useContext(AppSessionRefContext);
-  const router = useRouter();
-
-  const query = router.query as Query;
-  const queryValid = querySchema.isValidSync(query, { strict: true });
-
-  const path = `/api${router.asPath}`;
 
   const [state, setState] = useState<State>({
-    requestId: '',
-    scopesSelection: {},
+    scopesSelection: scopesSelectionInitial,
   });
 
-  const { error: fetchError } = useSWR<InternalResponse, FetchError>(
-    queryValid ? path : null,
-    (url: string) => fetch(url).then(async (res) => {
-      if(res.status > 200) throw new FetchError(res.status, res.statusText);
-      const response: InternalResponse = await res.json();
-      const requestId = response ? response.request_id : '';
-      const scopes = response ? response.scopes : [];
-      const scopesSelection: ScopesSelection = {};
-      scopes.forEach((scope) => {
-        scopesSelection[scope] = true;
-      });
-      setState({ requestId, scopesSelection });
-      return response;
-    }),
-  );
-
-  if(fetchError) return (
+  if(error) return (
     <NextError
-      statusCode={fetchError.status}
-      title={fetchError.statusText}
-    />
-  );
-
-  if(!queryValid) return (
-    <NextError
-      statusCode={400}
-      title={`Invalid query: ${router.pathname}`}
+      statusCode={error.status}
+      title={error.statusText}
     />
   );
 
@@ -101,10 +80,12 @@ const Authorise: NextPage = () => {
     });
   };
 
+  // <form onSubmit={submitHandler}>
+  // <form onSubmit={submitHandler} action="/api/approve" method="POST">
   return (
     <div>
       <h2>Approve this client?</h2>
-      <p><b>ID:</b> <code>{query.client_id}</code></p>
+      <p><b>ID:</b> <code>{requestId}</code></p>
       <form onSubmit={submitHandler}>
         <ul>
           {Object.entries(state.scopesSelection).map(([scope, selected]) => (
@@ -125,6 +106,52 @@ const Authorise: NextPage = () => {
       </form>
     </div>
   );
+};
+
+Authorise.propTypes = propTypes;
+
+Authorise.defaultProps = defaultProps;
+
+Authorise.getInitialProps = async (ctx): Promise<Props> => {
+  const { req, res } = ctx;
+  const query = ctx.query as Query;
+  const queryValid = querySchema.isValidSync(query, { strict: true });
+
+  const result: Props = {
+    requestId: '',
+    scopesSelectionInitial: {},
+  };
+
+  if(!queryValid) {
+    // Respond to server side rendering
+    if(req && res) {
+      const invalidQueryErrorMessage = `Invalid query: ${req.url}`;
+      res.statusMessage = invalidQueryErrorMessage;
+      res.statusCode = 404;
+      res.end();
+      result.error = {
+        status: res.statusCode,
+        statusText: res.statusMessage,
+      };
+    }
+    return result;
+  }
+
+  const { origin } = absoluteUrl(req);
+
+  const path = `${origin}/api${ctx.asPath}`;
+  const internRespRaw = await fetch(path);
+  const internResp: InternalResponse = await internRespRaw.json();
+
+  const scopesSelection: ScopesSelection = {};
+  internResp.scopes.forEach((scope) => {
+    scopesSelection[scope] = true;
+  });
+
+  result.requestId = internResp.request_id;
+  result.scopesSelectionInitial = scopesSelection;
+
+  return result;
 };
 
 export default Authorise;

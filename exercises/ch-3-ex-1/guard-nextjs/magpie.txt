@@ -1,0 +1,3 @@
+https://codeconqueror.com/blog/get-the-current-url-in-next-js
+https://sergiodxa.com/articles/redirects-in-next-the-good-way/
+https://codeconqueror.com/

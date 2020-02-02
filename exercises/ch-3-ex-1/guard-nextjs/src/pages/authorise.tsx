@@ -16,7 +16,7 @@ import NextError from 'next/error';
 import {
   querySchema,
   Query,
-  InternalResponse,
+  ApiResponse,
 } from '../api/authorise';
 
 const propTypes = {
@@ -141,7 +141,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   const path = `${origin}/api${ctx.asPath}`;
   const internRespRaw = await fetch(path);
-  const internResp: InternalResponse = await internRespRaw.json();
+  const internResp: ApiResponse = await internRespRaw.json();
 
   const scopesSelection: ScopesSelection = {};
   internResp.scopes.forEach((scope) => {

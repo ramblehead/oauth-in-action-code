@@ -4,15 +4,6 @@
 
 import * as yup from 'yup';
 
-const clients: Client[] = [
-  {
-    id: 'oauth-client-1',
-    secret: 'oauth-client-secret-1',
-    redirectUris: ['http://localhost:9000/callback'],
-    scope: ['foo', 'bar'],
-  },
-];
-
 export const querySchema = yup.object().shape({
   // response_type: yup.string().required(),
   client_id: yup.string().required(),
@@ -23,12 +14,21 @@ export const querySchema = yup.object().shape({
 
 export type Query = yup.InferType<typeof querySchema>;
 
-export const internalResponseSchema = yup.object().shape({
+export const apiResponseSchema = yup.object().shape({
   request_id: yup.string().required(),
   scopes: yup.array().of(yup.string()),
 }).noUnknown();
 
-export type InternalResponse = yup.InferType<typeof internalResponseSchema>;
+export type ApiResponse = yup.InferType<typeof apiResponseSchema>;
+
+const clients: Client[] = [
+  {
+    id: 'oauth-client-1',
+    secret: 'oauth-client-secret-1',
+    redirectUris: ['http://localhost:9000/callback'],
+    scope: ['foo', 'bar'],
+  },
+];
 
 export interface Client {
   id: string;

@@ -11,7 +11,7 @@ import {
 
 import {
   Query,
-  InternalResponse,
+  ApiResponse,
   getClient,
   redirectUriValid,
   scopesAllowed,
@@ -20,7 +20,7 @@ import {
 
 const authorise = async (
   req: NextApiRequest,
-  res: NextApiResponse<InternalResponse>,
+  res: NextApiResponse<ApiResponse>,
 ): Promise<void> => {
   if(req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);

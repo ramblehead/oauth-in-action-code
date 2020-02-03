@@ -8,6 +8,8 @@ const approve = async (
   req: NextApiRequest,
   res: NextApiResponse,
 ): Promise<void> => {
+  console.log('**** here');
+
   if(req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;
@@ -17,7 +19,10 @@ const approve = async (
     return;
   }
 
-  res.status(200).send(JSON.stringify(req.body));
+  // console.log(JSON.parse(req.body));
+  console.log(typeof req.body, req.body);
+  res.status(200).json(req.body);
+  // res.status(200).send(JSON.stringify(req.body));
 
   // res.status(200).send(req.body);
   // res.status(200).end();

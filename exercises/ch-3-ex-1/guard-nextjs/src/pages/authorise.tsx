@@ -2,7 +2,11 @@
 
 /* eslint-disable dot-notation */
 
-import React, { FormEvent, useState, ChangeEvent } from 'react';
+import React, {
+  FormEvent,
+  useState,
+  ChangeEvent,
+} from 'react';
 import PropTypes from 'prop-types';
 
 // import fetch from 'unfetch';
@@ -11,6 +15,7 @@ import fetch from 'isomorphic-unfetch';
 import absoluteUrl from 'next-absolute-url';
 
 import { NextPage } from 'next';
+// import { useRouter } from 'next/router';
 import NextError from 'next/error';
 
 import {
@@ -49,6 +54,7 @@ const Authorise: NextPage<Props> = ({
   error,
 }) => {
   // const { current: appSession } = useContext(AppSessionRefContext);
+  // const router = useRouter();
 
   const [state, setState] = useState<State>({
     scopesSelection: scopesSelectionInitial,
@@ -61,9 +67,36 @@ const Authorise: NextPage<Props> = ({
     />
   );
 
-  const submitHandler = (event: FormEvent<HTMLFormElement>): void => {
-    console.log(state);
+  const submitApproveHandler = async (
+    event: FormEvent<HTMLFormElement>,
+  ): Promise<void> => {
     event.preventDefault();
+
+    const approveQuery = {
+      scopesSelection: state.scopesSelection,
+      approval: 'approved',
+    };
+
+    const { origin } = absoluteUrl();
+    const path = `${origin}/api/approve`;
+    const approveRespRaw = await fetch(path, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(approveQuery),
+    });
+    const approveResp = await approveRespRaw.json();
+
+    console.log(path, approveResp);
+    console.log('approve', state);
+  };
+
+  const denyOnClickHandler = async (
+    _event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ): Promise<void> => {
+    console.log('deny', state);
   };
 
   const scopeSelectionOnChangeHandler = (
@@ -80,13 +113,11 @@ const Authorise: NextPage<Props> = ({
     });
   };
 
-  // <form onSubmit={submitHandler}>
-  // <form onSubmit={submitHandler} action="/api/approve" method="POST">
   return (
     <div>
       <h2>Approve this client?</h2>
       <p><b>ID:</b> <code>{requestId}</code></p>
-      <form onSubmit={submitHandler}>
+      <form onSubmit={submitApproveHandler}>
         <ul>
           {Object.entries(state.scopesSelection).map(([scope, selected]) => (
             <li key={scope}>
@@ -101,8 +132,8 @@ const Authorise: NextPage<Props> = ({
             </li>
           ))}
         </ul>
-        <input type="submit" name="approve" value="Approve" />
-        <input type="submit" name="denie" value="Denie" />
+        <button type="submit">Approve</button>
+        <button type="button" onClick={denyOnClickHandler}>Deny</button>
       </form>
     </div>
   );

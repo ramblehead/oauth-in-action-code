@@ -1,33 +1,38 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
+// http://localhost:3000/authorise?response_type=code&client_id=oauth-client-1&redirect_uri=http%3A%2F%2Flocalhost%3A9000%2Fcallback&scope=foo%20bar&state=123
+
 /* eslint-disable dot-notation */
+/* eslint-disable react/no-unused-prop-types */
 
 import React, {
   FormEvent,
   useState,
   ChangeEvent,
 } from 'react';
+
 import PropTypes from 'prop-types';
 
-// import fetch from 'unfetch';
-// import useSWR from 'swr';
 import fetch from 'isomorphic-unfetch';
 import absoluteUrl from 'next-absolute-url';
 
 import { NextPage } from 'next';
-// import { useRouter } from 'next/router';
 import NextError from 'next/error';
 
 import {
   querySchema,
   Query,
-  ApiResponse,
+  // authoriseOutputSchema,
+  AuthoriseOutput,
 } from '../api/authorise';
 
 const propTypes = {
+  responseType: PropTypes.string.isRequired,
   requestId: PropTypes.string.isRequired,
-  scopesSelectionInitial:
+  redirectUri: PropTypes.string.isRequired,
+  scopeSelectionInitial:
     PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
+  state: PropTypes.string.isRequired,
   error: PropTypes.shape({
     status: PropTypes.number.isRequired,
     statusText: PropTypes.string.isRequired,
@@ -48,48 +53,44 @@ interface State {
   scopesSelection: ScopesSelection;
 }
 
-const Authorise: NextPage<Props> = ({
-  requestId,
-  scopesSelectionInitial,
-  error,
-}) => {
+const Authorise: NextPage<Props> = (props) => {
   // const { current: appSession } = useContext(AppSessionRefContext);
   // const router = useRouter();
 
   const [state, setState] = useState<State>({
-    scopesSelection: scopesSelectionInitial,
+    scopesSelection: props.scopeSelectionInitial,
   });
 
-  if(error) return (
+  if(props.error) return (
     <NextError
-      statusCode={error.status}
-      title={error.statusText}
+      statusCode={props.error.status}
+      title={props.error.statusText}
     />
   );
 
-  const submitApproveHandler = async (
+  const approveSubmitHandler = async (
     event: FormEvent<HTMLFormElement>,
   ): Promise<void> => {
     event.preventDefault();
 
-    const approveQuery = {
+    const approveInput = {
       scopesSelection: state.scopesSelection,
       approval: 'approved',
     };
 
     const { origin } = absoluteUrl();
     const path = `${origin}/api/approve`;
-    const approveRespRaw = await fetch(path, {
+    const approveOutputRaw = await fetch(path, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(approveQuery),
+      body: JSON.stringify(approveInput),
     });
-    const approveResp = await approveRespRaw.json();
+    const approveOutput = await approveOutputRaw.json();
 
-    console.log(path, approveResp);
+    console.log(path, approveOutput);
     console.log('approve', state);
   };
 
@@ -116,8 +117,8 @@ const Authorise: NextPage<Props> = ({
   return (
     <div>
       <h2>Approve this client?</h2>
-      <p><b>ID:</b> <code>{requestId}</code></p>
-      <form onSubmit={submitApproveHandler}>
+      <p><b>ID:</b> <code>{props.requestId}</code></p>
+      <form onSubmit={approveSubmitHandler}>
         <ul>
           {Object.entries(state.scopesSelection).map(([scope, selected]) => (
             <li key={scope}>
@@ -144,43 +145,64 @@ Authorise.propTypes = propTypes;
 Authorise.defaultProps = defaultProps;
 
 Authorise.getInitialProps = async (ctx): Promise<Props> => {
-  const { req, res } = ctx;
+  const { req } = ctx;
   const query = ctx.query as Query;
   const queryValid = querySchema.isValidSync(query, { strict: true });
 
   const result: Props = {
+    responseType: '',
     requestId: '',
-    scopesSelectionInitial: {},
+    redirectUri: '',
+    scopeSelectionInitial: {},
+    state: '',
   };
 
   if(!queryValid) {
-    // Respond to server side rendering
-    if(req && res) {
-      const invalidQueryErrorMessage = `Invalid query: ${req.url}`;
-      res.statusMessage = invalidQueryErrorMessage;
-      res.statusCode = 404;
-      res.end();
-      result.error = {
-        status: res.statusCode,
-        statusText: res.statusMessage,
-      };
-    }
+    const invalidQueryErrorMessage = `Invalid query: ${ctx.asPath}`;
+    result.error = {
+      status: 404,
+      statusText: invalidQueryErrorMessage,
+    };
     return result;
   }
 
   const { origin } = absoluteUrl(req);
 
   const path = `${origin}/api${ctx.asPath}`;
-  const internRespRaw = await fetch(path);
-  const internResp: ApiResponse = await internRespRaw.json();
+  const authoriseResponseRaw = await fetch(path);
 
-  const scopesSelection: ScopesSelection = {};
-  internResp.scopes.forEach((scope) => {
-    scopesSelection[scope] = true;
+  if(authoriseResponseRaw.status > 200) {
+    result.error = {
+      status: authoriseResponseRaw.status,
+      statusText: authoriseResponseRaw.statusText,
+    };
+    return result;
+  }
+
+  const authoriseResponse =
+    await authoriseResponseRaw.json() as AuthoriseOutput;
+
+  // const authoriseOutputValid =
+  //   authoriseOutputSchema.isValidSync(query, { strict: true });
+
+  // if(!authoriseOutputValid) {
+  //   result.error = {
+  //     status: 502,
+  //     statusText: 'Invalid /api/authorise output',
+  //   };
+  //   return result;
+  // }
+
+  const scopeSelection: ScopesSelection = {};
+  authoriseResponse.scope.forEach((scope) => {
+    scopeSelection[scope] = true;
   });
 
-  result.requestId = internResp.request_id;
-  result.scopesSelectionInitial = scopesSelection;
+  result.responseType = authoriseResponse.responseType;
+  result.requestId = authoriseResponse.requestId;
+  result.redirectUri = authoriseResponse.redirectUri;
+  result.scopeSelectionInitial = scopeSelection;
+  result.state = authoriseResponse.state;
 
   return result;
 };

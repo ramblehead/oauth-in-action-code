@@ -11,16 +11,16 @@ import {
 
 import {
   Query,
-  ApiResponse,
+  AuthoriseOutput,
   getClient,
   redirectUriValid,
-  scopesAllowed,
+  scopeAllowed,
   querySchema,
 } from '../../api/authorise';
 
 const authorise = async (
   req: NextApiRequest,
-  res: NextApiResponse<ApiResponse>,
+  res: NextApiResponse<AuthoriseOutput>,
 ): Promise<void> => {
   if(req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
@@ -58,8 +58,8 @@ const authorise = async (
     return;
   }
 
-  const scopes = query.scope ? query.scope.split(' ') : [];
-  if(!scopesAllowed(client, scopes)) {
+  const scope = query.scope ? query.scope.split(' ') : [];
+  if(!scopeAllowed(client, scope)) {
     const invalidRequestedScopeErrorMessage =
       `Invalid Requested Scope: "${query.scope}"`;
     res.statusMessage = invalidRequestedScopeErrorMessage;
@@ -71,8 +71,11 @@ const authorise = async (
   serverSession.requests.set(requestId, query);
 
   res.status(200).json({
-    request_id: requestId,
-    scopes,
+    responseType: query.response_type,
+    requestId,
+    redirectUri,
+    scope,
+    state: query.state,
   });
 };
 

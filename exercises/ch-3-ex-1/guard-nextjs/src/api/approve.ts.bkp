@@ -1,23 +1,13 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-/* eslint-disable @typescript-eslint/camelcase */
+// https://repl.it/@jquense/Map-schema
 
 import * as yup from 'yup';
 
-export const querySchema = yup.object().shape({
-  response_type: yup.string().required(),
-  client_id: yup.string().required(),
-  redirect_uri: yup.string().required(),
-  scope: yup.string(),
-  state: yup.string().required(),
-}).noUnknown();
-
-export type Query = yup.InferType<typeof querySchema>;
-
-export const authoriseOutputSchema = yup.object().shape({
+export const approveInputSchema = yup.object().shape({
   responseType: yup.string().required(),
   requestId: yup.string().required(),
-  redirectUri: yup.string().required(),
+  scopeSelection: yup.object().oneOf(),
   scope: yup.array().of(yup.string().required()),
   state: yup.string().required(),
 }).noUnknown();

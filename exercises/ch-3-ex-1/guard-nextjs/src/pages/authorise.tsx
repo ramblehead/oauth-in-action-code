@@ -26,6 +26,10 @@ import {
   AuthoriseOutput,
 } from '../api/authorise';
 
+import {
+  ApproveInput,
+} from '../api/approve';
+
 const propTypes = {
   responseType: PropTypes.string.isRequired,
   requestId: PropTypes.string.isRequired,
@@ -45,12 +49,12 @@ const defaultProps = {
 
 type Props = PropTypes.InferProps<typeof propTypes>;
 
-interface ScopesSelection {
+interface ScopeSelection {
   [ scope: string ]: boolean;
 }
 
 interface State {
-  scopesSelection: ScopesSelection;
+  scopeSelection: ScopeSelection;
 }
 
 const Authorise: NextPage<Props> = (props) => {
@@ -58,7 +62,7 @@ const Authorise: NextPage<Props> = (props) => {
   // const router = useRouter();
 
   const [state, setState] = useState<State>({
-    scopesSelection: props.scopeSelectionInitial,
+    scopeSelection: props.scopeSelectionInitial,
   });
 
   if(props.error) return (
@@ -73,8 +77,11 @@ const Authorise: NextPage<Props> = (props) => {
   ): Promise<void> => {
     event.preventDefault();
 
-    const approveInput = {
-      scopesSelection: state.scopesSelection,
+    const approveInput: ApproveInput = {
+      responseType: props.responseType,
+      requestId: props.requestId,
+      scopeSelection: state.scopeSelection,
+      state: props.state,
       approval: 'approved',
     };
 
@@ -97,7 +104,7 @@ const Authorise: NextPage<Props> = (props) => {
   const denyOnClickHandler = async (
     _event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): Promise<void> => {
-    console.log('deny', state);
+    console.log('denied', state);
   };
 
   const scopeSelectionOnChangeHandler = (
@@ -106,8 +113,8 @@ const Authorise: NextPage<Props> = (props) => {
     const { name, checked } = event.target;
     setState((prevState): State => {
       const newState = { ...prevState };
-      newState.scopesSelection = {
-        ...prevState.scopesSelection,
+      newState.scopeSelection = {
+        ...prevState.scopeSelection,
         [name]: checked,
       };
       return newState;
@@ -120,7 +127,7 @@ const Authorise: NextPage<Props> = (props) => {
       <p><b>ID:</b> <code>{props.requestId}</code></p>
       <form onSubmit={approveSubmitHandler}>
         <ul>
-          {Object.entries(state.scopesSelection).map(([scope, selected]) => (
+          {Object.entries(state.scopeSelection).map(([scope, selected]) => (
             <li key={scope}>
               <input
                 type="checkbox"
@@ -193,7 +200,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
   //   return result;
   // }
 
-  const scopeSelection: ScopesSelection = {};
+  const scopeSelection: ScopeSelection = {};
   authoriseResponse.scope.forEach((scope) => {
     scopeSelection[scope] = true;
   });

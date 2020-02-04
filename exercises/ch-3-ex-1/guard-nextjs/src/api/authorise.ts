@@ -17,7 +17,7 @@ export type Query = yup.InferType<typeof querySchema>;
 export const authoriseOutputSchema = yup.object().shape({
   responseType: yup.string().required(),
   requestId: yup.string().required(),
-  redirectUri: yup.string().required(),
+  redirectUrl: yup.string().required(),
   scope: yup.array().of(yup.string().required()),
   state: yup.string().required(),
 }).noUnknown();

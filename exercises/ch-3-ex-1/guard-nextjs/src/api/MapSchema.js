@@ -75,10 +75,12 @@ Object.assign(MapSchema.prototype, {
     let promise = MixedSchema.prototype._validate
       .call(this, _value, options);
 
-    if(!abortEarly) promise = promise.catch((err) => {
-      errors.push(err);
-      return err.value;
-    });
+    if(!abortEarly) {
+      promise = promise.catch((err) => {
+        errors.push(err);
+        return err.value;
+      });
+    }
 
     return promise.then((value) => {
       if(!this._typeCheck(value)) {

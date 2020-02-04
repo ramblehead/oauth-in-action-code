@@ -65,12 +65,14 @@ const Authorise: NextPage<Props> = (props) => {
     scopeSelection: props.scopeSelectionInitial,
   });
 
-  if(props.error) return (
-    <NextError
-      statusCode={props.error.status}
-      title={props.error.statusText}
-    />
-  );
+  if(props.error) {
+    return (
+      <NextError
+        statusCode={props.error.status}
+        title={props.error.statusText}
+      />
+    );
+  }
 
   const approveSubmitHandler = async (
     event: FormEvent<HTMLFormElement>,
@@ -208,7 +210,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   result.responseType = authoriseResponse.responseType;
   result.requestId = authoriseResponse.requestId;
-  result.redirectUri = authoriseResponse.redirectUri;
+  result.redirectUri = authoriseResponse.redirectUrl;
   result.scopeSelectionInitial = scopeSelection;
   result.state = authoriseResponse.state;
 

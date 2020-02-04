@@ -73,7 +73,7 @@ const authorise = async (
   res.status(200).json({
     responseType: query.response_type,
     requestId,
-    redirectUri,
+    redirectUrl,
     scope,
     state: query.state,
   });

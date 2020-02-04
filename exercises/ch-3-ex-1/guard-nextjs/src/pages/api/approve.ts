@@ -1,18 +1,24 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
+import url from 'url';
+
 import { NextApiRequest, NextApiResponse } from 'next';
 
 import {
   approveInputSchema,
   ApproveInput,
+  ApproveOutput,
 } from '../../api/approve';
+
+import {
+  serverSession,
+  randomStringGenerate,
+} from '../../api';
 
 const approve = async (
   req: NextApiRequest,
   res: NextApiResponse,
 ): Promise<void> => {
-  console.log('**** here');
-
   if(req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
     const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;
@@ -22,20 +28,56 @@ const approve = async (
     return;
   }
 
-  const approveInput = req.body as ApproveInput;
+  const input = req.body as ApproveInput;
 
   const approveInputValid =
-    await approveInputSchema.isValid(approveInput, { strict: true });
+    await approveInputSchema.isValid(input, { strict: true });
 
-  console.log('approveInputValid =', approveInputValid);
-  console.log(typeof req.body, req.body);
-  res.status(200).json(req.body);
-  // res.status(200).send(JSON.stringify(req.body));
+  if(!approveInputValid) {
+    const invalidQueryErrorMessage = `Invalid input: ${input}`;
+    res.statusMessage = invalidQueryErrorMessage;
+    res.status(404).end();
+    return;
+  }
 
-  // res.status(200).send(req.body);
-  // res.status(200).end();
+  const query = serverSession.requests.get(input.requestId);
 
-  // res.status(200).end();
+  if(!query) {
+    const noMatchingAuthRequestErrorMessage =
+      'No matching authorization request';
+    res.statusMessage = noMatchingAuthRequestErrorMessage;
+    res.status(500).end();
+    return;
+  }
+
+  const output: ApproveOutput = {
+    responseUrl: '',
+  };
+
+  if(input.approval === 'approved') {
+    if(query.response_type === 'code') {
+      const code = randomStringGenerate(8);
+      console.log(code);
+    }
+    else {
+      const urlParsed = url.parse(query.redirect_uri, true);
+      urlParsed.query = urlParsed.query || {};
+      urlParsed.query.error = 'unsupported_response_type';
+      // res.redirect(url.format(urlParsed));
+      res.status(200).json(output);
+      return;
+    }
+  }
+  else {
+    const urlParsed = url.parse(query.redirect_uri, true);
+    urlParsed.query = urlParsed.query || {};
+    urlParsed.query.error = 'access_denied';
+    // res.redirect(url.format(urlParsed));
+    res.status(200).json(output);
+    return;
+  }
+
+  res.status(200).json(output);
 };
 
 export default approve;

@@ -1,8 +1,11 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { NextApiRequest, NextApiResponse } from 'next';
+
+import {
+  approveInputSchema,
+  ApproveInput,
+} from '../../api/approve';
 
 const approve = async (
   req: NextApiRequest,
@@ -19,7 +22,12 @@ const approve = async (
     return;
   }
 
-  // console.log(JSON.parse(req.body));
+  const approveInput = req.body as ApproveInput;
+
+  const approveInputValid =
+    await approveInputSchema.isValid(approveInput, { strict: true });
+
+  console.log('approveInputValid =', approveInputValid);
   console.log(typeof req.body, req.body);
   res.status(200).json(req.body);
   // res.status(200).send(JSON.stringify(req.body));

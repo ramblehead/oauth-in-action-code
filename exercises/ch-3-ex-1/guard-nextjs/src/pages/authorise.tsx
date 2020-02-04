@@ -81,6 +81,7 @@ const Authorise: NextPage<Props> = (props) => {
       responseType: props.responseType,
       requestId: props.requestId,
       scopeSelection: state.scopeSelection,
+      // scopeSelection: { foo: true, bar: false },
       state: props.state,
       approval: 'approved',
     };
@@ -154,7 +155,7 @@ Authorise.defaultProps = defaultProps;
 Authorise.getInitialProps = async (ctx): Promise<Props> => {
   const { req } = ctx;
   const query = ctx.query as Query;
-  const queryValid = querySchema.isValidSync(query, { strict: true });
+  const queryValid = await querySchema.isValid(query, { strict: true });
 
   const result: Props = {
     responseType: '',

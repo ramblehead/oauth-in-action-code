@@ -4,11 +4,40 @@
 
 import { mixed, string } from 'yup';
 import { inherits } from 'util';
-
-const runValidations = require('yup/lib/util/runValidations').default;
+import runValidations from 'yup/lib/util/runValidations';
 
 const MixedSchema = mixed;
 
+/**
+ * @typedef { import("yup").Ref } Ref
+ */
+
+/**
+ * @template T
+ * @typedef { import("yup").Schema<T> } Schema
+ */
+
+/**
+ * @template T
+ * @typedef { import("yup").InferType<T> } InferType
+ */
+
+/**
+ * @template V
+ * @typedef { { [ key : string ]: V } } Map
+ */
+
+/**
+ * @template V
+ * @typedef { Schema<Map<V>> | Ref } Result
+ */
+
+/**
+ * @template V
+ * @param {any} keySchema
+ * @param {V} valueSchema
+ * @return {Result<InferType<V>>}
+ */
 export default function MapSchema(keySchema, valueSchema) {
   if(!(this instanceof MapSchema)) return new MapSchema(keySchema, valueSchema);
 
@@ -51,10 +80,10 @@ Object.assign(MapSchema.prototype, {
       return err.value;
     });
 
-    return promise.then((aValue) => {
-      if(!this._typeCheck(aValue)) {
+    return promise.then((value) => {
+      if(!this._typeCheck(value)) {
         if(errors.length) throw errors[0];
-        return aValue;
+        return value;
       }
 
       originalValue = originalValue || value;

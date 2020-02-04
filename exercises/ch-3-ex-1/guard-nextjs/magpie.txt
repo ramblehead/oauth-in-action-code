@@ -4,3 +4,5 @@ https://codeconqueror.com/
 
 https://github.com/axios/axios
 https://github.com/visionmedia/superagent
+
+https://dev.to/jolvera/user-authentication-with-nextjs-4023

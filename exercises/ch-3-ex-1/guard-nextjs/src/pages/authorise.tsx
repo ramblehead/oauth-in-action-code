@@ -20,10 +20,11 @@ import { NextPage } from 'next';
 import NextError from 'next/error';
 
 import {
-  querySchema,
-  Query,
-  // authoriseOutputSchema,
+  AuthoriseInput,
   AuthoriseOutput,
+  Query,
+  authoriseOutputSchema,
+  querySchema,
 } from '../shared/authorise';
 
 import {
@@ -31,8 +32,8 @@ import {
 } from '../shared/approve';
 
 const propTypes = {
-  responseType: PropTypes.string.isRequired,
   requestId: PropTypes.string.isRequired,
+  responseType: PropTypes.string.isRequired,
   redirectUri: PropTypes.string.isRequired,
   scopeSelectionInitial:
     PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
@@ -90,7 +91,7 @@ const Authorise: NextPage<Props> = (props) => {
 
     const { origin } = absoluteUrl();
     const path = `${origin}/api/approve`;
-    const approveOutputRaw = await fetch(path, {
+    const approveResponse = await fetch(path, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -98,7 +99,7 @@ const Authorise: NextPage<Props> = (props) => {
       },
       body: JSON.stringify(approveInput),
     });
-    const approveOutput = await approveOutputRaw.json();
+    const approveOutput = await approveResponse.json();
 
     console.log(path, approveOutput);
     console.log('approve', state);
@@ -176,43 +177,59 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
     return result;
   }
 
+  const authoriseInput: AuthoriseInput = {
+    responseType: query.response_type,
+    clientId: query.client_id,
+    redirectUrl: query.redirect_uri,
+    requestedScope: query.scope ? query.scope.split(' ') : [],
+    state: query.state,
+  };
+
   const { origin } = absoluteUrl(req);
+  const path = `${origin}/api/authorise`;
+  const authoriseResponse = await fetch(path, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(authoriseInput),
+  });
 
-  const path = `${origin}/api${ctx.asPath}`;
-  const authoriseResponseRaw = await fetch(path);
-
-  if(authoriseResponseRaw.status > 200) {
+  if(authoriseResponse.status > 200) {
     result.error = {
-      status: authoriseResponseRaw.status,
-      statusText: authoriseResponseRaw.statusText,
+      status: authoriseResponse.status,
+      statusText: authoriseResponse.statusText,
     };
     return result;
   }
 
-  const authoriseResponse =
-    await authoriseResponseRaw.json() as AuthoriseOutput;
+  const authoriseOutput =
+    await authoriseResponse.json() as AuthoriseOutput;
 
-  // const authoriseOutputValid =
-  //   authoriseOutputSchema.isValidSync(query, { strict: true });
+  console.log(authoriseOutput);
 
-  // if(!authoriseOutputValid) {
-  //   result.error = {
-  //     status: 502,
-  //     statusText: 'Invalid /api/authorise output',
-  //   };
-  //   return result;
-  // }
+  const authoriseOutputValid =
+    await authoriseOutputSchema.isValid(authoriseOutput, { strict: true });
+
+  if(!authoriseOutputValid) {
+    result.error = {
+      status: 502,
+      statusText: 'Invalid /api/authorise output',
+    };
+    return result;
+  }
 
   const scopeSelection: ScopeSelection = {};
-  authoriseResponse.scope.forEach((scope) => {
+  authoriseOutput.authorisedScope.forEach((scope) => {
     scopeSelection[scope] = true;
   });
 
-  result.responseType = authoriseResponse.responseType;
-  result.requestId = authoriseResponse.requestId;
-  result.redirectUri = authoriseResponse.redirectUrl;
+  result.responseType = authoriseInput.responseType;
+  result.requestId = authoriseOutput.requestId;
+  result.redirectUri = authoriseInput.redirectUrl;
   result.scopeSelectionInitial = scopeSelection;
-  result.state = authoriseResponse.state;
+  result.state = authoriseInput.state;
 
   return result;
 };

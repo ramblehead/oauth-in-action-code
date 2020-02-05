@@ -9,72 +9,73 @@ import serverSession from '../../server/session';
 import randomStringGenerate from '../../server/randomStringGenerate';
 
 import {
-  Query,
+  AuthoriseInput,
   AuthoriseOutput,
+  authoriseInputSchema,
+} from '../../shared/authorise';
+
+import {
   getClient,
   redirectUriValid,
   scopeAllowed,
-  querySchema,
-} from '../../shared/authorise';
+} from '../../server/authorise';
 
 const authorise = async (
   req: NextApiRequest,
   res: NextApiResponse<AuthoriseOutput>,
 ): Promise<void> => {
-  if(req.method !== 'GET') {
-    res.setHeader('Allow', ['GET']);
+  if(req.method !== 'POST') {
+    res.setHeader('Allow', ['POST']);
     const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;
     res.statusMessage = methodNotAllowedErrorMessage;
     res.status(405).end();
     return;
   }
 
-  const query = req.query as Query;
-  const queryValid = querySchema.isValidSync(query, { strict: true });
-  if(!queryValid) {
-    const invalidQueryErrorMessage = `Invalid query: ${req.url}`;
-    res.statusMessage = invalidQueryErrorMessage;
+  const input = req.body as AuthoriseInput;
+  const inputValid =
+    await authoriseInputSchema.isValid(input, { strict: true });
+
+  if(!inputValid) {
+    const invalidInputErrorMessage = `Invalid input: ${input}`;
+    res.statusMessage = invalidInputErrorMessage;
     res.status(404).end();
     return;
   }
 
-  const client = getClient(query.client_id);
+  const client = getClient(input.clientId);
 
   if(!client) {
-    const unknownClientErrorMessage = `Unknown client_id: "${query.client_id}"`;
+    const unknownClientErrorMessage = `Unknown clientId: "${input.clientId}"`;
     res.statusMessage = unknownClientErrorMessage;
     res.status(404).end();
     return;
   }
 
-  const redirectUrl = query.redirect_uri;
-
-  if(!redirectUriValid(client, redirectUrl)) {
+  if(!redirectUriValid(client, input.redirectUrl)) {
     const invalidRedirectUriErrorMessage =
-      `Invalid Redirect URI: "${redirectUrl}"`;
+      `Invalid Redirect redirectUrl: "${input.redirectUrl}"`;
     res.statusMessage = invalidRedirectUriErrorMessage;
     res.status(404).end();
     return;
   }
 
-  const scope = query.scope ? query.scope.split(' ') : [];
-  if(!scopeAllowed(client, scope)) {
+  if(!scopeAllowed(client, input.requestedScope)) {
     const invalidRequestedScopeErrorMessage =
-      `Invalid Requested Scope: "${query.scope}"`;
+      `Invalid Requested Scope: "${input.requestedScope}"`;
     res.statusMessage = invalidRequestedScopeErrorMessage;
     res.status(404).end();
     return;
   }
 
+  const authorisedScope = input.requestedScope;
+
   const requestId = randomStringGenerate(8);
-  serverSession.requests.set(requestId, query);
+  serverSession.requests.set(requestId, input);
 
   res.status(200).json({
-    responseType: query.response_type,
     requestId,
-    redirectUrl,
-    scope,
-    state: query.state,
+    authorisedScope,
   });
 };
 

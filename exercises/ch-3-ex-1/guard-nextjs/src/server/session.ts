@@ -2,12 +2,12 @@
 
 import fs, { promises as fsp } from 'fs';
 
-import { Query } from '../shared/authorise';
+import { AuthoriseInput } from '../shared/authorise';
 
 type Expiry = Date | null;
 
 interface RequestRecord {
-  query: Query;
+  request: AuthoriseInput;
   expiry: Expiry;
 }
 
@@ -38,14 +38,14 @@ class Requests {
     return fsp.writeFile(this.fileName, storeJson);
   }
 
-  set(id: string, query: Query): void {
-    this._records[id] = { query, expiry: null };
+  set(id: string, request: AuthoriseInput): void {
+    this._records[id] = { request, expiry: null };
     this.save();
   }
 
-  get(id: string): Query | undefined {
+  get(id: string): AuthoriseInput | undefined {
     const record = this._records[id];
-    if(record) return record.query;
+    if(record) return record.request;
     return undefined;
   }
 

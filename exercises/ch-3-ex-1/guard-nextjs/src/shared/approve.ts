@@ -9,7 +9,6 @@ export const approveInputSchema = yup.object().shape({
   requestId: yup.string().required(),
   // map hack until it is supported:
   // https://github.com/jquense/yup/issues/524
-  // scopeSelection: yup.object(),
   scopeSelection: MapSchema(
     yup.string().min(3),
     yup.boolean().required(),

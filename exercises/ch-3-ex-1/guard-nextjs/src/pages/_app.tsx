@@ -10,7 +10,7 @@ import React, {
 import { AppProps } from 'next/app';
 // import App, { AppContext, AppInitialProps, AppProps } from 'next/app';
 
-import { appSession, AppSessionRefContext, AppSessionRef } from '../session';
+import { appSession, AppSessionRefContext, AppSessionRef } from '../client';
 
 const GateApp = ({ Component, pageProps }: AppProps): JSX.Element => {
   const [appSessionRef, setModelRef] = useState(

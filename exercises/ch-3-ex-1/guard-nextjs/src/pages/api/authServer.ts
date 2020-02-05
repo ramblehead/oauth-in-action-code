@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 
 import { NextApiRequest, NextApiResponse } from 'next';
-import { authServerConfig, AuthServerConfig } from '../../api/authServer';
+import { authServerConfig, AuthServerConfig } from '../../shared/authServer';
 
 const authServer = (
   req: NextApiRequest,

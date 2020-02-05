@@ -4,10 +4,9 @@
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import {
-  serverSession,
-  randomStringGenerate,
-} from '../../api';
+import serverSession from '../../server/session';
+
+import randomStringGenerate from '../../server/randomStringGenerate';
 
 import {
   Query,
@@ -16,7 +15,7 @@ import {
   redirectUriValid,
   scopeAllowed,
   querySchema,
-} from '../../api/authorise';
+} from '../../shared/authorise';
 
 const authorise = async (
   req: NextApiRequest,
@@ -48,11 +47,11 @@ const authorise = async (
     return;
   }
 
-  const redirectUri = query.redirect_uri;
+  const redirectUrl = query.redirect_uri;
 
-  if(!redirectUriValid(client, redirectUri)) {
+  if(!redirectUriValid(client, redirectUrl)) {
     const invalidRedirectUriErrorMessage =
-      `Invalid Redirect URI: "${redirectUri}"`;
+      `Invalid Redirect URI: "${redirectUrl}"`;
     res.statusMessage = invalidRedirectUriErrorMessage;
     res.status(404).end();
     return;

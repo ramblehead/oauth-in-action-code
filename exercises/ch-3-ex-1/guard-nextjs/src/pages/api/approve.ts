@@ -8,12 +8,11 @@ import {
   approveInputSchema,
   ApproveInput,
   ApproveOutput,
-} from '../../api/approve';
+} from '../../shared/approve';
 
-import {
-  serverSession,
-  randomStringGenerate,
-} from '../../api';
+import serverSession from '../../server/session';
+
+import randomStringGenerate from '../../server/randomStringGenerate';
 
 const approve = async (
   req: NextApiRequest,

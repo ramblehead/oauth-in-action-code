@@ -2,7 +2,7 @@
 
 import fs, { promises as fsp } from 'fs';
 
-import { Query } from './authorise';
+import { Query } from '../shared/authorise';
 
 type Expiry = Date | null;
 
@@ -66,4 +66,6 @@ class ServerSession {
   requests = new Requests('requests-store.json');
 }
 
-export default ServerSession;
+const serverSession = new ServerSession();
+
+export default serverSession;

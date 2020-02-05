@@ -9,7 +9,7 @@ import Link from 'next/link';
 import NextError from 'next/error';
 import { NextPage } from 'next';
 
-import { AppSessionRefContext } from '../session';
+import { AppSessionRefContext } from '../client';
 
 const Index: NextPage = () => {
   const { current: appSession } = useContext(AppSessionRefContext);

@@ -24,11 +24,11 @@ import {
   Query,
   // authoriseOutputSchema,
   AuthoriseOutput,
-} from '../api/authorise';
+} from '../shared/authorise';
 
 import {
   ApproveInput,
-} from '../api/approve';
+} from '../shared/approve';
 
 const propTypes = {
   responseType: PropTypes.string.isRequired,

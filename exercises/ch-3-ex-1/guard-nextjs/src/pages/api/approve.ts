@@ -57,6 +57,8 @@ const approve = async (
       const code = randomStringGenerate(8);
       console.log(code);
 
+      // input.selectedScope
+
       const urlParsed = url.parse(request.redirectUrl, true);
       urlParsed.query = urlParsed.query || {};
 

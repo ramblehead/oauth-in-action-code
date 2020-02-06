@@ -29,6 +29,7 @@ import {
 
 import {
   ApproveInput,
+  approveOutputSchema,
 } from '../shared/approve';
 
 const propTypes = {
@@ -38,17 +39,18 @@ const propTypes = {
   scopeSelectionInitial:
     PropTypes.objectOf(PropTypes.bool.isRequired).isRequired,
   state: PropTypes.string.isRequired,
-  error: PropTypes.shape({
+  errorInitial: PropTypes.shape({
     status: PropTypes.number.isRequired,
     statusText: PropTypes.string.isRequired,
   }),
 };
 
 const defaultProps = {
-  error: undefined,
+  errorInitial: undefined,
 };
 
 type Props = PropTypes.InferProps<typeof propTypes>;
+type Error = Props['errorInitial'];
 
 interface ScopeSelection {
   [ scope: string ]: boolean;
@@ -56,6 +58,7 @@ interface ScopeSelection {
 
 interface State {
   scopeSelection: ScopeSelection;
+  error: Error;
 }
 
 const Authorise: NextPage<Props> = (props) => {
@@ -64,13 +67,14 @@ const Authorise: NextPage<Props> = (props) => {
 
   const [state, setState] = useState<State>({
     scopeSelection: props.scopeSelectionInitial,
+    error: props.errorInitial,
   });
 
-  if(props.error) {
+  if(state.error) {
     return (
       <NextError
-        statusCode={props.error.status}
-        title={props.error.statusText}
+        statusCode={state.error.status}
+        title={state.error.statusText}
       />
     );
   }
@@ -92,7 +96,6 @@ const Authorise: NextPage<Props> = (props) => {
       responseType: props.responseType,
       requestId: props.requestId,
       selectedScope,
-      // scopeSelection: { foo: true, bar: false },
       state: props.state,
       approval: 'approved',
     };
@@ -108,6 +111,22 @@ const Authorise: NextPage<Props> = (props) => {
       body: JSON.stringify(approveInput),
     });
     const approveOutput = await approveResponse.json();
+
+    const approveOutputValid =
+      await approveOutputSchema.isValid(approveOutput, { strict: true });
+    if(!approveOutputValid) {
+      setState((prevState): State => {
+        const invalidApproveOutputErrorMessage =
+          `Invalid Approve Output: ${approveOutput}`;
+        const newState = { ...prevState };
+        newState.error = {
+          status: 404,
+          statusText: invalidApproveOutputErrorMessage,
+        };
+        return newState;
+      });
+      return;
+    }
 
     console.log(path, approveOutput);
     console.log('approve', state);
@@ -178,7 +197,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   if(!queryValid) {
     const invalidQueryErrorMessage = `Invalid query: ${ctx.asPath}`;
-    result.error = {
+    result.errorInitial = {
       status: 404,
       statusText: invalidQueryErrorMessage,
     };
@@ -205,7 +224,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
   });
 
   if(authoriseResponse.status > 200) {
-    result.error = {
+    result.errorInitial = {
       status: authoriseResponse.status,
       statusText: authoriseResponse.statusText,
     };
@@ -219,7 +238,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
     await authoriseOutputSchema.isValid(authoriseOutput, { strict: true });
 
   if(!authoriseOutputValid) {
-    result.error = {
+    result.errorInitial = {
       status: 502,
       statusText: 'Invalid /api/authorise output',
     };

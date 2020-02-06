@@ -80,10 +80,18 @@ const Authorise: NextPage<Props> = (props) => {
   ): Promise<void> => {
     event.preventDefault();
 
+    const selectedScope =
+      Object.entries(state.scopeSelection).reduce<string[]>(
+        (prev, cur) => {
+          if(cur[1] === true) prev.push(cur[0]);
+          return prev;
+        }, [],
+      );
+
     const approveInput: ApproveInput = {
       responseType: props.responseType,
       requestId: props.requestId,
-      scopeSelection: state.scopeSelection,
+      selectedScope,
       // scopeSelection: { foo: true, bar: false },
       state: props.state,
       approval: 'approved',
@@ -206,8 +214,6 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   const authoriseOutput =
     await authoriseResponse.json() as AuthoriseOutput;
-
-  console.log(authoriseOutput);
 
   const authoriseOutputValid =
     await authoriseOutputSchema.isValid(authoriseOutput, { strict: true });

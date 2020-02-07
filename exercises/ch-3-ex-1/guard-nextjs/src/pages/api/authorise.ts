@@ -18,7 +18,7 @@ import {
   getClient,
   redirectUriValid,
   scopeAllowed,
-} from '../../server/authorise';
+} from '../../server/clients';
 
 const authorise = async (
   req: NextApiRequest,

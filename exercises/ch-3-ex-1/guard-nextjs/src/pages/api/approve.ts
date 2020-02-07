@@ -14,6 +14,11 @@ import serverSession from '../../server/session';
 
 import randomStringGenerate from '../../server/randomStringGenerate';
 
+import {
+  getClient,
+  scopeAllowed,
+} from '../../server/clients';
+
 const approve = async (
   req: NextApiRequest,
   res: NextApiResponse,
@@ -55,14 +60,21 @@ const approve = async (
   if(input.approval === 'approved') {
     if(request.responseType === 'code') {
       const code = randomStringGenerate(8);
-      console.log(code);
-
-      // input.selectedScope
 
       const urlParsed = url.parse(request.redirectUrl, true);
       urlParsed.query = urlParsed.query || {};
 
-      output.responseUrl = url.format(urlParsed);
+      const client = getClient(request.clientId)!;
+      if(scopeAllowed(client, input.selectedScope)) {
+        // save code here
+        urlParsed.query.code = code;
+        urlParsed.query.state = request.state;
+        output.responseUrl = url.format(urlParsed);
+      }
+      else {
+        urlParsed.query.error = 'invalid_scope';
+        output.responseUrl = url.format(urlParsed);
+      }
     }
     else {
       const urlParsed = url.parse(request.redirectUrl, true);

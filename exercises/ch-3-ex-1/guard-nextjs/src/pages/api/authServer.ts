@@ -15,6 +15,7 @@ const authServer = (
     case 'GET':
       res.status(200).json(authServerConfig);
       break;
+
     default: {
       res.setHeader('Allow', ['GET']);
       const methodNotAllowedErrorMessage = `Method ${req.method} Not Allowed`;

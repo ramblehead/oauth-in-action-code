@@ -66,6 +66,73 @@ interface State {
   error: Error;
 }
 
+const approveSubmitHandler = async (
+  event: FormEvent<HTMLFormElement>,
+  props: Props,
+  state: State,
+  setState: (value: (prevState: State) => State) => void,
+): Promise<void> => {
+  event.preventDefault();
+
+  const selectedScope =
+    Object.entries(state.scopeSelection).reduce<string[]>(
+      (prev, cur) => {
+        if(cur[1] === true) prev.push(cur[0]);
+        return prev;
+      }, [],
+    );
+
+  const approveInput: ApproveInput = {
+    responseType: props.responseType,
+    authoriseInputId: props.requestId,
+    selectedScope,
+    state: props.state,
+    approval: 'approved',
+  };
+
+  const { origin } = absoluteUrl();
+  const path = `${origin}/api/approve`;
+  const approveResponse = await fetch(path, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(approveInput),
+  });
+
+  if(approveResponse.status > 200) {
+    setState((prevState): State => {
+      const newState = { ...prevState };
+      newState.error = {
+        status: approveResponse.status,
+        statusText: approveResponse.statusText,
+      };
+      return newState;
+    });
+    return;
+  }
+
+  const approveOutput: ApproveOutput = await approveResponse.json();
+
+  const approveOutputValid =
+    await approveOutputSchema.isValid(approveOutput, { strict: true });
+  if(!approveOutputValid) {
+    setState((prevState): State => {
+      const invalidApproveOutputErrorMessage = 'Invalid /api/approve Output';
+      const newState = { ...prevState };
+      newState.error = {
+        status: 502,
+        statusText: invalidApproveOutputErrorMessage,
+      };
+      return newState;
+    });
+    return;
+  }
+
+  setTimeout(() => { window.location.href = approveOutput.responseUrl; }, 0);
+};
+
 const Authorise: NextPage<Props> = (props) => {
   // const { current: appSession } = useContext(AppSessionRefContext);
   // const router = useRouter();
@@ -83,59 +150,6 @@ const Authorise: NextPage<Props> = (props) => {
       />
     );
   }
-
-  const approveSubmitHandler = async (
-    event: FormEvent<HTMLFormElement>,
-  ): Promise<void> => {
-    event.preventDefault();
-
-    const selectedScope =
-      Object.entries(state.scopeSelection).reduce<string[]>(
-        (prev, cur) => {
-          if(cur[1] === true) prev.push(cur[0]);
-          return prev;
-        }, [],
-      );
-
-    const approveInput: ApproveInput = {
-      responseType: props.responseType,
-      authoriseInputId: props.requestId,
-      selectedScope,
-      state: props.state,
-      approval: 'approved',
-    };
-
-    const { origin } = absoluteUrl();
-    const path = `${origin}/api/approve`;
-    const approveResponse = await fetch(path, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(approveInput),
-    });
-
-    const approveOutput: ApproveOutput = await approveResponse.json();
-
-    const approveOutputValid =
-      await approveOutputSchema.isValid(approveOutput, { strict: true });
-    if(!approveOutputValid) {
-      setState((prevState): State => {
-        const invalidApproveOutputErrorMessage =
-          `Invalid Approve Output: ${approveOutput}`;
-        const newState = { ...prevState };
-        newState.error = {
-          status: 500,
-          statusText: invalidApproveOutputErrorMessage,
-        };
-        return newState;
-      });
-      return;
-    }
-
-    setTimeout(() => { window.location.href = approveOutput.responseUrl; }, 0);
-  };
 
   const denyOnClickHandler = async (
     _event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -161,7 +175,11 @@ const Authorise: NextPage<Props> = (props) => {
     <div>
       <h2>Approve this client?</h2>
       <p><b>ID:</b> <code>{props.requestId}</code></p>
-      <form onSubmit={approveSubmitHandler}>
+      <form
+        onSubmit={(event): void => {
+          approveSubmitHandler(event, props, state, setState);
+        }}
+      >
         <ul>
           {Object.entries(state.scopeSelection).map(([scope, selected]) => (
             <li key={scope}>
@@ -243,9 +261,10 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
     await authoriseOutputSchema.isValid(authoriseOutput, { strict: true });
 
   if(!authoriseOutputValid) {
+    const invalidAuthoriseOutputErrorMessage = 'Invalid /api/authorise output';
     result.errorInitial = {
       status: 502,
-      statusText: 'Invalid /api/authorise output',
+      statusText: invalidAuthoriseOutputErrorMessage,
     };
     return result;
   }

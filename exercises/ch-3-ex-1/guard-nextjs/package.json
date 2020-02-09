@@ -26,6 +26,7 @@
     "next": "^9.1.7",
     "next-absolute-url": "^1.2.0",
     "node-persist": "^3.0.5",
+    "nosql": "^6.1.0",
     "performance-now": "^2.1.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",

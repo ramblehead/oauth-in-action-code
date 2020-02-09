@@ -4760,6 +4760,11 @@ normalize-url@1.9.1:
     query-string "^4.1.0"
     sort-keys "^1.0.0"
 
+nosql@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/nosql/-/nosql-6.1.0.tgz#cb6d49063e6998f1ff90cc6ea62842f4b2d5c51b"
+  integrity sha512-xbrxt3h+UknsZbF6pWpWZmyD2lFSbKSc4IlcaO5uKUlhho4At9qSHlr/SrCLdLWHgTVTnf5gyIcHHYPpDgMOMg==
+
 num2fraction@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/num2fraction/-/num2fraction-1.2.2.tgz#6f682b6a027a4e9ddfa4564cd2589d1d4e669ede"

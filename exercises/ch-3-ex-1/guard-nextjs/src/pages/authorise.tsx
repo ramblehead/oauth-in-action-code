@@ -38,7 +38,7 @@ import {
 } from '../shared/approve';
 
 const propTypes = {
-  requestId: PropTypes.string.isRequired,
+  authoriseInputId: PropTypes.string.isRequired,
   responseType: PropTypes.string.isRequired,
   redirectUri: PropTypes.string.isRequired,
   scopeSelectionInitial:
@@ -84,7 +84,7 @@ const approveSubmitHandler = async (
 
   const approveInput: ApproveInput = {
     responseType: props.responseType,
-    authoriseInputId: props.requestId,
+    authoriseInputId: props.authoriseInputId,
     selectedScope,
     state: props.state,
     approval: 'approved',
@@ -134,9 +134,6 @@ const approveSubmitHandler = async (
 };
 
 const Authorise: NextPage<Props> = (props) => {
-  // const { current: appSession } = useContext(AppSessionRefContext);
-  // const router = useRouter();
-
   const [state, setState] = useState<State>({
     scopeSelection: props.scopeSelectionInitial,
     error: props.errorInitial,
@@ -174,7 +171,7 @@ const Authorise: NextPage<Props> = (props) => {
   return (
     <div>
       <h2>Approve this client?</h2>
-      <p><b>ID:</b> <code>{props.requestId}</code></p>
+      <p><b>ID:</b> <code>{props.authoriseInputId}</code></p>
       <form
         onSubmit={(event): void => {
           approveSubmitHandler(event, props, state, setState);
@@ -212,7 +209,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   const result: Props = {
     responseType: '',
-    requestId: '',
+    authoriseInputId: '',
     redirectUri: '',
     scopeSelectionInitial: {},
     state: '',
@@ -275,7 +272,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
   });
 
   result.responseType = authoriseInput.responseType;
-  result.requestId = authoriseOutput.authoriseInputId;
+  result.authoriseInputId = authoriseOutput.authoriseInputId;
   result.redirectUri = authoriseInput.redirectUrl;
   result.scopeSelectionInitial = scopeSelection;
   result.state = authoriseInput.state;

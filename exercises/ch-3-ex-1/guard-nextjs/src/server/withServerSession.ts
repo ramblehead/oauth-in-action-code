@@ -6,37 +6,55 @@ import storage, { WriteFileResult } from 'node-persist';
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
-import { Query } from '../shared/authorise';
+import { AuthoriseInput } from '../shared/authorise';
+import { CodeRecord } from './code';
 
 let storageInitialised = false;
 
 const storageInitialiseLazy = async (): Promise<void> => {
   if(!storageInitialised) {
-    await storage.init();
+    await storage.init({
+      expiredInterval: 2 * 60 * 1000,
+      ttl: 5 * 60 * 1000,
+    });
     storageInitialised = true;
   }
 };
 
 class ServerSession {
-  async setQuery(id: string, query: Query): Promise<WriteFileResult> {
-    return storage.setItem(id, query);
+  async setAuthoriseInput(
+    id: string,
+    request: AuthoriseInput,
+  ): Promise<WriteFileResult> {
+    return storage.setItem(`request/${id}`, request);
   }
 
-  async getQuery(id: string, query: Query): Promise<WriteFileResult> {
-    return storage.setItem(id, query);
+  async getAuthoriseInput(id: string): Promise<AuthoriseInput> {
+    return storage.getItem(`request/${id}`);
+  }
+
+  async setCodeRecord(
+    code: string,
+    record: CodeRecord,
+  ): Promise<WriteFileResult> {
+    return storage.setItem(`codeRecord/${code}`, record);
+  }
+
+  async getCodeRecord(code: string): Promise<CodeRecord> {
+    return storage.getItem(`codeRecord/${code}`);
   }
 }
 
 const serverSession = new ServerSession();
 
-interface RequestWithSession extends NextApiRequest {
+export interface RequestWithSession extends NextApiRequest {
   serverSession: ServerSession;
 }
 
-type Handler =
-  (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
-
 type HigherOrderHandler =
+  (req: RequestWithSession, res: NextApiResponse) => Promise<void>;
+
+type Handler =
   (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
 
 const withServerSession = (handler: HigherOrderHandler): Handler => (
@@ -44,7 +62,7 @@ const withServerSession = (handler: HigherOrderHandler): Handler => (
     await storageInitialiseLazy();
     const hreq = req as RequestWithSession;
     hreq.serverSession = serverSession;
-    handler(hreq, res);
+    return handler(hreq, res);
   }
 );
 

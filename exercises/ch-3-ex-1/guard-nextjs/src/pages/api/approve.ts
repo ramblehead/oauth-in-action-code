@@ -2,7 +2,7 @@
 
 import url from 'url';
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 
 import {
   approveInputSchema,
@@ -10,7 +10,9 @@ import {
   ApproveOutput,
 } from '../../shared/approve';
 
-import serverSession from '../../server/session';
+import withServerSession, {
+  RequestWithSession,
+} from '../../server/withServerSession';
 
 import randomStringGenerate from '../../server/randomStringGenerate';
 
@@ -20,7 +22,7 @@ import {
 } from '../../server/clients';
 
 const approve = async (
-  req: NextApiRequest,
+  req: RequestWithSession,
   res: NextApiResponse,
 ): Promise<void> => {
   if(req.method !== 'POST') {
@@ -43,9 +45,10 @@ const approve = async (
     return;
   }
 
-  const request = serverSession.requests.get(input.requestId);
+  const authoriseInput =
+    await req.serverSession.getAuthoriseInput(input.authoriseInputId);
 
-  if(!request) {
+  if(!authoriseInput) {
     const noMatchingAuthRequestErrorMessage =
       'No matching authorization request';
     res.statusMessage = noMatchingAuthRequestErrorMessage;
@@ -58,17 +61,30 @@ const approve = async (
   };
 
   if(input.approval === 'approved') {
-    if(request.responseType === 'code') {
+    if(authoriseInput.responseType === 'code') {
       const code = randomStringGenerate(8);
 
-      const urlParsed = url.parse(request.redirectUrl, true);
+      const urlParsed = url.parse(authoriseInput.redirectUrl, true);
       urlParsed.query = urlParsed.query || {};
 
-      const client = getClient(request.clientId)!;
+      const client = getClient(authoriseInput.clientId);
+
+      if(!client) {
+        const unknownClientErrorMessage =
+          `Unknown clientId: "${authoriseInput.clientId}"`;
+        res.statusMessage = unknownClientErrorMessage;
+        res.status(500).end();
+        return;
+      }
+
       if(scopeAllowed(client, input.selectedScope)) {
-        // save code here
+        await req.serverSession.setCodeRecord(code, {
+          authoriseInput,
+          scope: input.selectedScope,
+        });
+
         urlParsed.query.code = code;
-        urlParsed.query.state = request.state;
+        urlParsed.query.state = authoriseInput.state;
         output.responseUrl = url.format(urlParsed);
       }
       else {
@@ -77,14 +93,14 @@ const approve = async (
       }
     }
     else {
-      const urlParsed = url.parse(request.redirectUrl, true);
+      const urlParsed = url.parse(authoriseInput.redirectUrl, true);
       urlParsed.query = urlParsed.query || {};
       urlParsed.query.error = 'unsupported_response_type';
       output.responseUrl = url.format(urlParsed);
     }
   }
   else {
-    const urlParsed = url.parse(request.redirectUrl, true);
+    const urlParsed = url.parse(authoriseInput.redirectUrl, true);
     urlParsed.query = urlParsed.query || {};
     urlParsed.query.error = 'access_denied';
     output.responseUrl = url.format(urlParsed);
@@ -93,4 +109,4 @@ const approve = async (
   res.status(200).json(output);
 };
 
-export default approve;
+export default withServerSession(approve);

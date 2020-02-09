@@ -17,18 +17,23 @@ import fetch from 'isomorphic-unfetch';
 import absoluteUrl from 'next-absolute-url';
 
 import { NextPage } from 'next';
+// import Router from 'next/router';
 import NextError from 'next/error';
 
 import {
   AuthoriseInput,
   AuthoriseOutput,
-  Query,
   authoriseOutputSchema,
-  querySchema,
 } from '../shared/authorise';
 
 import {
+  AuthorisationEndpointRequest as Query,
+  authorisationEndpointRequestSchema as querySchema,
+} from '../shared/queries';
+
+import {
   ApproveInput,
+  ApproveOutput,
   approveOutputSchema,
 } from '../shared/approve';
 
@@ -94,7 +99,7 @@ const Authorise: NextPage<Props> = (props) => {
 
     const approveInput: ApproveInput = {
       responseType: props.responseType,
-      requestId: props.requestId,
+      authoriseInputId: props.requestId,
       selectedScope,
       state: props.state,
       approval: 'approved',
@@ -110,7 +115,8 @@ const Authorise: NextPage<Props> = (props) => {
       },
       body: JSON.stringify(approveInput),
     });
-    const approveOutput = await approveResponse.json();
+
+    const approveOutput: ApproveOutput = await approveResponse.json();
 
     const approveOutputValid =
       await approveOutputSchema.isValid(approveOutput, { strict: true });
@@ -120,7 +126,7 @@ const Authorise: NextPage<Props> = (props) => {
           `Invalid Approve Output: ${approveOutput}`;
         const newState = { ...prevState };
         newState.error = {
-          status: 404,
+          status: 500,
           statusText: invalidApproveOutputErrorMessage,
         };
         return newState;
@@ -128,8 +134,7 @@ const Authorise: NextPage<Props> = (props) => {
       return;
     }
 
-    console.log(path, approveOutput);
-    console.log('approve', state);
+    setTimeout(() => { window.location.href = approveOutput.responseUrl; }, 0);
   };
 
   const denyOnClickHandler = async (
@@ -251,7 +256,7 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
   });
 
   result.responseType = authoriseInput.responseType;
-  result.requestId = authoriseOutput.requestId;
+  result.requestId = authoriseOutput.authoriseInputId;
   result.redirectUri = authoriseInput.redirectUrl;
   result.scopeSelectionInitial = scopeSelection;
   result.state = authoriseInput.state;

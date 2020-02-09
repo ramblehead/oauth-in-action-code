@@ -4,7 +4,7 @@ import * as yup from 'yup';
 
 export const approveInputSchema = yup.object().shape({
   responseType: yup.string().required(),
-  requestId: yup.string().required(),
+  authoriseInputId: yup.string().required(),
   selectedScope: yup.array().of(yup.string().required()),
   state: yup.string().required(),
   approval: yup.string().oneOf(['approved', 'denied']).required(),

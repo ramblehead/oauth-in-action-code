@@ -2,9 +2,11 @@
 
 /* eslint-disable @typescript-eslint/camelcase */
 
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 
-import serverSession from '../../server/session';
+import withServerSession, {
+  RequestWithSession,
+} from '../../server/withServerSession';
 
 import randomStringGenerate from '../../server/randomStringGenerate';
 
@@ -21,7 +23,7 @@ import {
 } from '../../server/clients';
 
 const authorise = async (
-  req: NextApiRequest,
+  req: RequestWithSession,
   res: NextApiResponse<AuthoriseOutput>,
 ): Promise<void> => {
   if(req.method !== 'POST') {
@@ -70,13 +72,13 @@ const authorise = async (
 
   const authorisedScope = input.requestedScope;
 
-  const requestId = randomStringGenerate(8);
-  serverSession.requests.set(requestId, input);
+  const id = randomStringGenerate(8);
+  req.serverSession.setAuthoriseInput(id, input);
 
   res.status(200).json({
-    requestId,
+    authoriseInputId: id,
     authorisedScope,
   });
 };
 
-export default authorise;
+export default withServerSession(authorise);

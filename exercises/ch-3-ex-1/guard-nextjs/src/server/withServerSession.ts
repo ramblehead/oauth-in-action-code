@@ -29,7 +29,7 @@ class ServerSession {
     return storage.setItem(`request/${id}`, request);
   }
 
-  async getAuthoriseInput(id: string): Promise<AuthoriseInput> {
+  async getAuthoriseInput(id: string): Promise<AuthoriseInput | null> {
     return storage.getItem(`request/${id}`);
   }
 
@@ -40,7 +40,7 @@ class ServerSession {
     return storage.setItem(`codeRecord/${code}`, record);
   }
 
-  async getCodeRecord(code: string): Promise<CodeRecord> {
+  async getCodeRecord(code: string): Promise<CodeRecord | null> {
     return storage.getItem(`codeRecord/${code}`);
   }
 }

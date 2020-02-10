@@ -6,3 +6,8 @@ https://github.com/axios/axios
 https://github.com/visionmedia/superagent
 
 https://dev.to/jolvera/user-authentication-with-nextjs-4023
+
+
+
+
+https://www.syntaxsuccess.com/viewarticle/scalable-react-build-with-bazel

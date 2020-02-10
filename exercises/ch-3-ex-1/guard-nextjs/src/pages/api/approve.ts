@@ -14,7 +14,7 @@ import withServerSession, {
   RequestWithSession,
 } from '../../server/withServerSession';
 
-import randomStringGenerate from '../../server/randomStringGenerate';
+import { randomStringGenerate } from '../../server/utils';
 
 import {
   getClient,

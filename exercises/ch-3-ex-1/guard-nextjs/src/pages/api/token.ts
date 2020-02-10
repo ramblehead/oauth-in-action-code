@@ -6,6 +6,8 @@ import withServerSession, {
   RequestWithSession,
 } from '../../server/withServerSession';
 
+import { encodeClientCredentials } from '../../server/utils';
+
 // import randomStringGenerate from '../../server/randomStringGenerate';
 
 // import { getClient } from '../../server/clients';
@@ -20,9 +22,18 @@ const approve = async (
     res.statusCode = 405;
     res.statusMessage = methodNotAllowedErrorMessage;
     res.end();
-    return;
+    // return;
   }
 
+  // const auth = req.headers.authorization;
+  // if(auth) {
+  //   // check the auth header
+  //   var clientCredentials =
+  //     Buffer.from(auth.slice('basic '.length), 'base64')
+  //     .toString().split(':');
+  //   var clientId = querystring.unescape(clientCredentials[0]);
+  //   var clientSecret = querystring.unescape(clientCredentials[1]);
+  // }
 };
 
 export default withServerSession(approve);

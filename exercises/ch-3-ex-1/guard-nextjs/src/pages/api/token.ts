@@ -1,5 +1,7 @@
 // Hey Emacs, this is -*- coding: utf-8 -*-
 
+/* eslint-disable @typescript-eslint/camelcase */
+
 import { NextApiResponse } from 'next';
 
 import withServerSession, {
@@ -7,11 +9,16 @@ import withServerSession, {
 } from '../../server/withServerSession';
 
 import {
+  ClientCredentials,
   decodeClientCredentials,
-  DecodeClientCredentialsResult,
+  randomStringGenerate,
 } from '../../server/utils';
 
 import { getClient } from '../../server/clients';
+
+const nosql = require('nosql').load(
+  '/home/rh/projects/oauth-in-action-code/exercises/ch-3-ex-1/database.nosql',
+);
 
 // import randomStringGenerate from '../../server/randomStringGenerate';
 
@@ -28,12 +35,12 @@ const approve = async (
     return;
   }
 
-  let credentials: DecodeClientCredentialsResult | undefined;
+  let credentials: ClientCredentials | undefined;
 
   // Check the auth header
   const auth = req.headers.authorization;
   if(auth) {
-    const credentialsEncoded = auth.slice('basic '.length);
+    const credentialsEncoded = auth.slice('Basic '.length);
     credentials = decodeClientCredentials(credentialsEncoded);
   }
 
@@ -75,7 +82,7 @@ const approve = async (
   }
 
   if(client.secret !== clientSecret) {
-    console.log('Mismatched client secret');
+    // console.log('Mismatched client secret');
     const mismatchedClientSecretErrorMessage = 'Mismatched client secret';
     res.statusCode = 401;
     res.statusMessage = mismatchedClientSecretErrorMessage;
@@ -86,18 +93,46 @@ const approve = async (
   if(req.body.grant_type === 'authorization_code') {
     const codeRecord = await req.serverSession.getCodeRecord(req.body.code);
     if(codeRecord) {
+      req.serverSession.deleteCodeRecord(req.body.code);
+
+      if(codeRecord.authoriseInput.clientId === clientId) {
+        const accessToken = randomStringGenerate(8);
+
+        let scope: string | null = null;
+        if(codeRecord.scope) scope = codeRecord.scope.join(' ');
+
+        nosql.insert({
+          access_token: accessToken,
+          client_id: clientId,
+          scope,
+        });
+
+        res.status(200).json({
+          access_token: accessToken,
+          token_type: 'Bearer',
+          scope,
+        });
+
+        console.log('Issuing access token %s', accessToken);
+        console.log('with scope %s', scope);
+        console.log('Issued tokens for code %s', req.body.code);
+      }
+      else {
+        const clientMismatchErrorMessage = 'Client mismatch';
+        res.statusCode = 400;
+        res.statusMessage = clientMismatchErrorMessage;
+        res.json({ error: 'invalid_grant' });
+      }
     }
     else {
-      const unknownGrantType =
-        `Unknown code, "${req.body.code}"`;
+      const unknownGrantType = `Unknown code, "${req.body.code}"`;
       res.statusCode = 400;
       res.statusMessage = unknownGrantType;
       res.json({ error: 'invalid_grant' });
     }
   }
   else {
-    const unknownGrantType =
-      `Unknown grant type: "${req.body.grant_type}"`;
+    const unknownGrantType = `Unknown grant type: "${req.body.grant_type}"`;
     res.statusCode = 400;
     res.statusMessage = unknownGrantType;
     res.json({ error: 'unsupported_grant_type' });

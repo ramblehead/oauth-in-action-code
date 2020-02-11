@@ -2,7 +2,10 @@
 
 /* eslint-disable class-methods-use-this */
 
-import storage, { WriteFileResult } from 'node-persist';
+import storage, {
+  WriteFileResult,
+  DeleteFileResult,
+} from 'node-persist';
 
 import { NextApiRequest, NextApiResponse } from 'next';
 
@@ -42,6 +45,10 @@ class ServerSession {
 
   async getCodeRecord(code: string): Promise<CodeRecord | null> {
     return storage.getItem(`codeRecord/${code}`);
+  }
+
+  async deleteCodeRecord(code: string): Promise<DeleteFileResult> {
+    return storage.removeItem(`codeRecord/${code}`);
   }
 }
 

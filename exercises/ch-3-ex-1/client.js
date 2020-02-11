@@ -16,8 +16,10 @@ app.set('views', 'files/client');
 
 // authorization server information
 var authServer = {
-	authorizationEndpoint: 'http://localhost:9001/authorize',
-	tokenEndpoint: 'http://localhost:9001/token'
+	// authorizationEndpoint: 'http://localhost:9001/authorize',
+	// tokenEndpoint: 'http://localhost:9001/token'
+	authorizationEndpoint: 'http://localhost:3000/authorize',
+	tokenEndpoint: 'http://localhost:3000/api/token'
 };
 
 // client information

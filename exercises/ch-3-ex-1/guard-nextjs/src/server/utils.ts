@@ -17,14 +17,14 @@ export const encodeClientCredentials = (
   return Buffer.from(`${clientIdEsc}:${clientSecretEsc}`).toString('base64');
 };
 
-export type DecodeClientCredentialsResult = {
+export type ClientCredentials = {
   clientId: string;
   clientSecret: string;
 };
 
 export const decodeClientCredentials = (
   credentialsEncoded: string,
-): DecodeClientCredentialsResult => {
+): ClientCredentials => {
   const credentials = Buffer.from(credentialsEncoded, 'base64').toString();
   const [clientIdEsc, clientSecretEsc] = credentials.split(':');
   const clientId = querystring.unescape(clientIdEsc);

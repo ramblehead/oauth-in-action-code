@@ -38,6 +38,7 @@ import {
 } from '../shared/approve';
 
 const propTypes = {
+  clientId: PropTypes.string.isRequired,
   authoriseInputId: PropTypes.string.isRequired,
   responseType: PropTypes.string.isRequired,
   redirectUri: PropTypes.string.isRequired,
@@ -171,7 +172,7 @@ const Authorise: NextPage<Props> = (props) => {
   return (
     <div>
       <h2>Approve this client?</h2>
-      <p><b>ID:</b> <code>{props.authoriseInputId}</code></p>
+      <p><b>ID:</b> <code>{props.clientId}</code></p>
       <form
         onSubmit={(event): void => {
           approveSubmitHandler(event, props, state, setState);
@@ -208,8 +209,9 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
   const queryValid = await querySchema.isValid(query, { strict: true });
 
   const result: Props = {
-    responseType: '',
+    clientId: '',
     authoriseInputId: '',
+    responseType: '',
     redirectUri: '',
     scopeSelectionInitial: {},
     state: '',
@@ -217,6 +219,8 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
 
   if(!queryValid) {
     const invalidQueryErrorMessage = `Invalid query: ${ctx.asPath}`;
+    console.trace(invalidQueryErrorMessage);
+    // console.error(invalidQueryErrorMessage);
     result.errorInitial = {
       status: 404,
       statusText: invalidQueryErrorMessage,
@@ -271,8 +275,9 @@ Authorise.getInitialProps = async (ctx): Promise<Props> => {
     scopeSelection[scope] = true;
   });
 
-  result.responseType = authoriseInput.responseType;
+  result.clientId = authoriseInput.clientId;
   result.authoriseInputId = authoriseOutput.authoriseInputId;
+  result.responseType = authoriseInput.responseType;
   result.redirectUri = authoriseInput.redirectUrl;
   result.scopeSelectionInitial = scopeSelection;
   result.state = authoriseInput.state;

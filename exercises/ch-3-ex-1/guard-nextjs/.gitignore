@@ -10,3 +10,4 @@
 
 # temporary
 /requests-store.json
+/.node-persist

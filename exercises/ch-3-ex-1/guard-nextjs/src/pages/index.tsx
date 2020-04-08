@@ -29,7 +29,7 @@ const Index: NextPage = () => {
       <Link href="/about">
         <a href="/about" title="About Page">About Page</a>
       </Link>
-      <p>XXX</p>
+      <p>Artizanya</p>
       <button
         type="button"
         onClick={(_event): void => {
